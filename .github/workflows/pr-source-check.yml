@@ -1,0 +1,26 @@
+name: PR Source Check
+
+# Pull request ke main hanya boleh berasal dari branch dev di repo ini.
+on:
+  pull_request:
+    branches: [main]
+    types: [opened, reopened, synchronize, edited]
+
+permissions: {}
+
+jobs:
+  only-from-dev:
+    name: only-from-dev
+    runs-on: ubuntu-latest
+    steps:
+      - name: Pastikan PR berasal dari dev
+        env:
+          HEAD_REF: ${{ github.head_ref }}
+          HEAD_REPO: ${{ github.event.pull_request.head.repo.full_name }}
+          THIS_REPO: ${{ github.repository }}
+        run: |
+          if [ "$HEAD_REF" != "dev" ] || [ "$HEAD_REPO" != "$THIS_REPO" ]; then
+            echo "::error::PR ke main hanya boleh dari branch 'dev' (PR ini dari '$HEAD_REPO:$HEAD_REF'). Merge perubahanmu ke dev dulu, lalu buka PR dev -> main."
+            exit 1
+          fi
+          echo "OK: PR berasal dari $HEAD_REPO:$HEAD_REF"
