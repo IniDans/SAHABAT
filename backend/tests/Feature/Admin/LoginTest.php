@@ -26,7 +26,7 @@ class LoginTest extends TestCase
     {
         $user = User::factory()->admin()->create();
 
-        $this->post('/login', ['email' => $user->email, 'password' => 'password'])
+        $this->post('/login', ['login' => $user->email, 'password' => 'password'])
             ->assertRedirect(route('admin.dashboard'));
 
         $this->assertAuthenticatedAs($user);
@@ -37,14 +37,24 @@ class LoginTest extends TestCase
         $this->assertGuest();
     }
 
+    public function test_user_can_log_in_with_username(): void
+    {
+        $user = User::factory()->create(['name' => 'pengurus']);
+
+        $this->post('/login', ['login' => 'pengurus', 'password' => 'password'])
+            ->assertRedirect(route('admin.dashboard'));
+
+        $this->assertAuthenticatedAs($user);
+    }
+
     public function test_wrong_password_is_rejected(): void
     {
         $user = User::factory()->create();
 
         $this->from('/login')
-            ->post('/login', ['email' => $user->email, 'password' => 'salah'])
+            ->post('/login', ['login' => $user->email, 'password' => 'salah'])
             ->assertRedirect('/login')
-            ->assertSessionHasErrors(['email' => 'Email atau password salah.']);
+            ->assertSessionHasErrors(['login' => 'Email/username atau password salah.']);
 
         $this->assertGuest();
     }
@@ -53,8 +63,8 @@ class LoginTest extends TestCase
     {
         $user = User::factory()->inactive()->create();
 
-        $this->post('/login', ['email' => $user->email, 'password' => 'password'])
-            ->assertSessionHasErrors('email');
+        $this->post('/login', ['login' => $user->email, 'password' => 'password'])
+            ->assertSessionHasErrors('login');
 
         $this->assertGuest();
     }

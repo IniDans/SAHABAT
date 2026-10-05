@@ -7,6 +7,7 @@ use App\Enums\StatusBerita;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\BeritaRequest;
 use App\Models\Berita;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -21,7 +22,7 @@ class BeritaController extends Controller
     {
         $berita = Berita::query()
             ->when($request->string('search')->value(), fn ($q, $search) => $q->where('judul', 'like', "%{$search}%"))
-            ->when($request->enum('kategori', KategoriBerita::class), fn ($q, $kategori) => $q->where('kategori', $kategori))
+            ->when($request->string('kategori')->value(), fn ($q, $kategori) => $q->where('kategori', $kategori))
             ->when($request->enum('status', StatusBerita::class), fn ($q, $status) => $q->where('status', $status))
             ->latest('tanggal_terbit')
             ->latest('id')
@@ -32,11 +33,11 @@ class BeritaController extends Controller
     }
 
     /**
-     * Form tambah berita.
+     * Form tulis artikel.
      */
     public function create(): View
     {
-        return view('admin.berita.form', ['berita' => new Berita(['tanggal_terbit' => today()])]);
+        return $this->form(new Berita(['tanggal_terbit' => today(), 'kategori' => KategoriBerita::Kegiatan->value]));
     }
 
     /**
@@ -52,15 +53,15 @@ class BeritaController extends Controller
 
         $berita->save();
 
-        return to_route('admin.berita.index')->with('status', 'Berita berhasil ditambahkan.');
+        return to_route('admin.berita.edit', $berita)->with('status', $this->pesanSimpan($berita));
     }
 
     /**
-     * Form ubah berita.
+     * Form ubah artikel.
      */
     public function edit(Berita $berita): View
     {
-        return view('admin.berita.form', ['berita' => $berita]);
+        return $this->form($berita);
     }
 
     /**
@@ -77,7 +78,7 @@ class BeritaController extends Controller
 
         $berita->save();
 
-        return to_route('admin.berita.index')->with('status', 'Berita berhasil diperbarui.');
+        return to_route('admin.berita.edit', $berita)->with('status', $this->pesanSimpan($berita));
     }
 
     /**
@@ -88,7 +89,43 @@ class BeritaController extends Controller
         $this->deleteGambar($berita);
         $berita->delete();
 
-        return to_route('admin.berita.index')->with('status', 'Berita berhasil dihapus.');
+        return to_route('admin.berita.index')->with('status', 'Artikel berhasil dihapus.');
+    }
+
+    /**
+     * Unggah gambar dari tombol "Gambar" di editor, kembalikan URL-nya.
+     */
+    public function unggahGambar(Request $request): JsonResponse
+    {
+        $request->validate([
+            'gambar' => ['required', 'image', 'max:2048'],
+        ]);
+
+        $path = $request->file('gambar')->store(Berita::GAMBAR_FOLDER.'/isi', 'public');
+
+        return response()->json(['url' => parse_url(Storage::disk('public')->url($path), PHP_URL_PATH)]);
+    }
+
+    private function form(Berita $berita): View
+    {
+        return view('admin.berita.form', [
+            'berita' => $berita,
+            'daftarKategori' => Berita::daftarKategori(),
+            // Pilihan untuk tombol "Baca juga" di editor.
+            'artikelLain' => Berita::query()
+                ->where('status', StatusBerita::Terbit)
+                ->whereKeyNot($berita->getKey())
+                ->latest('tanggal_terbit')
+                ->limit(50)
+                ->get(['judul', 'slug'])
+                ->map(fn (Berita $lain): array => ['judul' => $lain->judul, 'url' => route('artikel.show', $lain->slug, false)])
+                ->all(),
+        ]);
+    }
+
+    private function pesanSimpan(Berita $berita): string
+    {
+        return $berita->status === StatusBerita::Terbit ? 'Artikel diterbitkan.' : 'Artikel disimpan sebagai draf.';
     }
 
     private function deleteGambar(Berita $berita): void

@@ -5,6 +5,7 @@ use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\DonasiController;
 use App\Http\Controllers\Admin\KebutuhanPantiController;
 use App\Http\Controllers\Admin\LoginController;
+use App\Http\Controllers\Admin\PesanController;
 use App\Http\Controllers\SiteController;
 use Illuminate\Support\Facades\Route;
 
@@ -12,6 +13,7 @@ Route::get('/', [SiteController::class, 'home'])->name('beranda');
 
 Route::prefix('donasi')->name('donasi.')->group(function () {
     Route::view('formulir', 'pages.donasi.formulir')->name('formulir');
+    Route::post('formulir', [SiteController::class, 'kirimDonasi'])->middleware('throttle:5,1')->name('formulir.store');
     Route::view('validasi', 'pages.donasi.validasi')->name('validasi');
     Route::view('cara-qris', 'pages.donasi.cara-qris')->name('qris');
     Route::view('rekening', 'pages.donasi.rekening')->name('rekening');
@@ -29,6 +31,7 @@ Route::prefix('tentang-kami')->name('tentang.')->group(function () {
     Route::view('pengurus', 'pages.tentang.pengurus')->name('pengurus');
     Route::get('galeri', [SiteController::class, 'galeri'])->name('galeri');
     Route::view('kontak', 'pages.tentang.kontak')->name('kontak');
+    Route::post('kontak', [SiteController::class, 'kirimPesan'])->middleware('throttle:5,1')->name('kontak.store');
     Route::get('anak-asuh', [SiteController::class, 'anakAsuh'])->name('anak-asuh');
 });
 
@@ -44,20 +47,31 @@ Route::middleware('auth')->group(function () {
     Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/', DashboardController::class)->name('dashboard');
 
+        Route::post('berita/gambar', [BeritaController::class, 'unggahGambar'])->middleware('throttle:30,1')->name('berita.gambar');
         // Menghapus data hanya boleh dilakukan admin, sama seperti di API.
         Route::resource('berita', BeritaController::class)
             ->except('show')
             ->parameters(['berita' => 'berita'])
             ->middlewareFor('destroy', 'can:admin');
 
+        Route::patch('kebutuhan-panti/{kebutuhan_panti}/terpenuhi', [KebutuhanPantiController::class, 'toggleTerpenuhi'])->name('kebutuhan-panti.terpenuhi');
         Route::resource('kebutuhan-panti', KebutuhanPantiController::class)
             ->except('show')
             ->middlewareFor('destroy', 'can:admin');
 
+        Route::get('donasi/ekspor', [DonasiController::class, 'ekspor'])->name('donasi.ekspor');
         Route::patch('donasi/{donasi}/status', [DonasiController::class, 'updateStatus'])->name('donasi.status');
         Route::resource('donasi', DonasiController::class)
             ->except('show')
             ->parameters(['donasi' => 'donasi'])
+            ->middlewareFor('destroy', 'can:admin');
+
+        Route::post('pesan/tandai-dibaca', [PesanController::class, 'tandaiSemuaDibaca'])->name('pesan.tandai-dibaca');
+        Route::patch('pesan/{pesan}/status', [PesanController::class, 'updateStatus'])->name('pesan.status');
+        Route::post('pesan/{pesan}/balas', [PesanController::class, 'balas'])->name('pesan.balas');
+        Route::resource('pesan', PesanController::class)
+            ->only(['index', 'show', 'destroy'])
+            ->parameters(['pesan' => 'pesan'])
             ->middlewareFor('destroy', 'can:admin');
     });
 });

@@ -7,31 +7,93 @@ use App\Enums\StatusDonasi;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\DonasiRequest;
 use App\Models\Donasi;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class DonasiController extends Controller
 {
     /**
-     * Daftar donasi beserta total yang sudah diterima sesuai filter.
-     * Filter: search (nama donatur), program, status, dari/sampai (tanggal donasi).
+     * Pilihan urutan daftar donasi: kunci query => [label, kolom, arah].
+     *
+     * @var array<string, array{0: string, 1: string, 2: string}>
+     */
+    public const URUTAN = [
+        'terbaru' => ['Terbaru', 'tanggal_donasi', 'desc'],
+        'terlama' => ['Terlama', 'tanggal_donasi', 'asc'],
+        'terbesar' => ['Nominal terbesar', 'nominal', 'desc'],
+        'terkecil' => ['Nominal terkecil', 'nominal', 'asc'],
+    ];
+
+    /**
+     * Daftar donasi beserta total yang sudah diterima per program pada bulan terpilih.
+     * Filter: search (nama/email/WA), program, status, bulan (Y-m atau "semua"), urut.
      */
     public function index(Request $request): View
     {
-        $query = Donasi::query()
-            ->when($request->string('search')->value(), fn ($q, $search) => $q->where('nama_donatur', 'like', "%{$search}%"))
-            ->when($request->enum('program', ProgramDonasi::class), fn ($q, $program) => $q->where('program', $program))
-            ->when($request->enum('status', StatusDonasi::class), fn ($q, $status) => $q->where('status', $status))
-            ->when($request->date('dari'), fn ($q, $dari) => $q->whereDate('tanggal_donasi', '>=', $dari))
-            ->when($request->date('sampai'), fn ($q, $sampai) => $q->whereDate('tanggal_donasi', '<=', $sampai));
+        $bulan = $this->bulanDipilih($request, now()->format('Y-m'));
+
+        $donasi = $this->filtered($request, $bulan)
+            ->tap(fn (Builder $query) => $this->urutkan($query, $request))
+            ->paginate(10)
+            ->withQueryString();
+
+        $totalPerProgram = Donasi::query()
+            ->diterima()
+            ->when($bulan, fn ($q) => $this->dalamBulan($q, $bulan))
+            ->selectRaw('program, sum(nominal) as total')
+            ->groupBy('program')
+            ->pluck('total', 'program')
+            ->map(fn ($total): int => (int) $total);
 
         return view('admin.donasi.index', [
-            'donasi' => (clone $query)->latest('tanggal_donasi')->latest('id')->paginate(10)->withQueryString(),
-            'totalDiterima' => (int) (clone $query)->diterima()->sum('nominal'),
-            'jumlahMenunggu' => (clone $query)->where('status', StatusDonasi::Menunggu)->count(),
+            'donasi' => $donasi,
+            'bulan' => $bulan,
+            'pilihanBulan' => $this->pilihanBulan(),
+            'totalDiterima' => $totalPerProgram->sum(),
+            'totalPerProgram' => collect(ProgramDonasi::cases())
+                ->mapWithKeys(fn (ProgramDonasi $program): array => [$program->value => $totalPerProgram->get($program->value, 0)]),
+            'jumlahMenunggu' => Donasi::where('status', StatusDonasi::Menunggu)->count(),
         ]);
+    }
+
+    /**
+     * Unduh donasi sesuai filter yang sedang dipakai sebagai CSV.
+     */
+    public function ekspor(Request $request): StreamedResponse
+    {
+        $bulan = $this->bulanDipilih($request, now()->format('Y-m'));
+        $query = $this->filtered($request, $bulan)->tap(fn (Builder $query) => $this->urutkan($query, $request));
+        $namaFile = 'donasi-'.($bulan?->format('Y-m') ?? 'semua').'.csv';
+
+        return response()->streamDownload(function () use ($query): void {
+            $out = fopen('php://output', 'w');
+            // BOM agar Excel membaca huruf non-ASCII dengan benar.
+            fwrite($out, "\xEF\xBB\xBF");
+            fputcsv($out, ['Tanggal', 'Nama donatur', 'Ditampilkan sebagai', 'No WhatsApp', 'Email', 'Alamat', 'Program', 'Nominal', 'Metode', 'Status', 'Keterangan']);
+
+            foreach ($query->lazy() as $item) {
+                fputcsv($out, [
+                    $item->tanggal_donasi->toDateString(),
+                    $item->nama_donatur,
+                    $item->tampil_sebagai->value,
+                    $item->no_whatsapp,
+                    $item->email,
+                    $item->alamat,
+                    $item->program->value,
+                    $item->nominal,
+                    $item->metode_pembayaran->value,
+                    $item->status->value,
+                    $item->keterangan,
+                ]);
+            }
+
+            fclose($out);
+        }, $namaFile, ['Content-Type' => 'text/csv; charset=UTF-8']);
     }
 
     /**
@@ -92,5 +154,40 @@ class DonasiController extends Controller
         $donasi->delete();
 
         return to_route('admin.donasi.index')->with('status', 'Donasi berhasil dihapus.');
+    }
+
+    /**
+     * Query donasi dengan semua filter dari request.
+     *
+     * @return Builder<Donasi>
+     */
+    private function filtered(Request $request, ?Carbon $bulan): Builder
+    {
+        return Donasi::query()
+            ->when($request->string('search')->trim()->value(), fn ($q, $search) => $q->where(fn ($q) => $q
+                ->where('nama_donatur', 'like', "%{$search}%")
+                ->orWhere('email', 'like', "%{$search}%")
+                ->orWhere('no_whatsapp', 'like', "%{$search}%")))
+            ->when($request->enum('program', ProgramDonasi::class), fn ($q, $program) => $q->where('program', $program))
+            ->when($request->enum('status', StatusDonasi::class), fn ($q, $status) => $q->where('status', $status))
+            ->when($bulan, fn ($q) => $this->dalamBulan($q, $bulan));
+    }
+
+    /**
+     * @param  Builder<Donasi>  $query
+     */
+    private function dalamBulan(Builder $query, Carbon $bulan): void
+    {
+        $query->whereBetween('tanggal_donasi', [$bulan->copy()->startOfMonth()->toDateString(), $bulan->copy()->endOfMonth()->toDateString()]);
+    }
+
+    /**
+     * @param  Builder<Donasi>  $query
+     */
+    private function urutkan(Builder $query, Request $request): void
+    {
+        [, $kolom, $arah] = self::URUTAN[$request->string('urut')->value()] ?? self::URUTAN['terbaru'];
+
+        $query->orderBy($kolom, $arah)->orderBy('id', $arah);
     }
 }

@@ -1,4 +1,5 @@
 @php
+    use App\Enums\KategoriKebutuhan;
     use App\Enums\PrioritasKebutuhan;
 
     $isEdit = $kebutuhan->exists;
@@ -20,6 +21,14 @@
 
         <x-admin.field label="Nama kebutuhan" name="nama" required>
             <input id="nama" name="nama" type="text" value="{{ old('nama', $kebutuhan->nama) }}" required maxlength="255" placeholder="Contoh: Beras" class="admin-input" @error('nama') aria-invalid="true" aria-describedby="nama-error" @enderror>
+        </x-admin.field>
+
+        <x-admin.field label="Kategori" name="kategori" required>
+            <select id="kategori" name="kategori" required class="admin-input" @error('kategori') aria-invalid="true" aria-describedby="kategori-error" @enderror>
+                @foreach (KategoriKebutuhan::cases() as $kategori)
+                    <option value="{{ $kategori->value }}" @selected(old('kategori', $kebutuhan->kategori?->value) === $kategori->value)>{{ $kategori->value }}</option>
+                @endforeach
+            </select>
         </x-admin.field>
 
         <div class="grid gap-5 sm:grid-cols-2">

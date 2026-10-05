@@ -39,7 +39,6 @@ class Berita extends Model
     protected function casts(): array
     {
         return [
-            'kategori' => KategoriBerita::class,
             'status' => StatusBerita::class,
             'tanggal_terbit' => 'date:Y-m-d',
         ];
@@ -55,6 +54,22 @@ class Berita extends Model
                 $berita->slug = $berita->uniqueSlug();
             }
         });
+    }
+
+    /**
+     * Kategori bawaan ditambah kategori baru yang pernah dibuat admin, urut abjad.
+     *
+     * @return list<string>
+     */
+    public static function daftarKategori(): array
+    {
+        return collect(KategoriBerita::cases())
+            ->map(fn (KategoriBerita $kategori): string => $kategori->value)
+            ->merge(static::query()->distinct()->pluck('kategori'))
+            ->unique(fn (string $kategori): string => mb_strtolower($kategori))
+            ->sort(SORT_NATURAL | SORT_FLAG_CASE)
+            ->values()
+            ->all();
     }
 
     /**

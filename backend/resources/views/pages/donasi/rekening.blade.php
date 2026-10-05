@@ -12,6 +12,12 @@
 <x-layouts.app title="Rekening Donasi">
     <x-page-header title="Rekening Donasi" :breadcrumbs="['Rekening Donasi' => null]" />
 
+    @session('status')
+        <div class="container-site pt-6">
+            <p class="rounded border border-[#badbcc] bg-[#d1e7dd] px-4 py-3 font-open text-sm text-[#0f5132]" role="status">{{ $value }}</p>
+        </div>
+    @endsession
+
     <section class="container-site flex flex-col items-center gap-10 py-10 lg:flex-row lg:items-center lg:justify-center lg:gap-[38px] lg:pt-5 lg:pb-[60px]">
         <div class="flex flex-col gap-8 sm:flex-row sm:gap-[38px]">
             <img src="{{ asset('images/qris/qris-panti.png') }}" alt="QRIS donasi Panti Asuhan YASIBU" width="284" height="400" class="h-auto w-[284px]">

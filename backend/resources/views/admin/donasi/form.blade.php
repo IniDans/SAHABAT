@@ -2,6 +2,7 @@
     use App\Enums\MetodePembayaran;
     use App\Enums\ProgramDonasi;
     use App\Enums\StatusDonasi;
+    use App\Enums\TampilanDonatur;
 
     $isEdit = $donasi->exists;
 @endphp
@@ -21,7 +22,15 @@
         @endif
 
         <x-admin.field label="Nama donatur" name="nama_donatur" required>
-            <input id="nama_donatur" name="nama_donatur" type="text" value="{{ old('nama_donatur', $donasi->nama_donatur) }}" required maxlength="255" placeholder="Tulis Hamba Allah bila anonim" class="admin-input" @error('nama_donatur') aria-invalid="true" aria-describedby="nama_donatur-error" @enderror>
+            <input id="nama_donatur" name="nama_donatur" type="text" value="{{ old('nama_donatur', $donasi->nama_donatur) }}" required maxlength="255" placeholder="Nama lengkap donatur" class="admin-input" @error('nama_donatur') aria-invalid="true" aria-describedby="nama_donatur-error" @enderror>
+        </x-admin.field>
+
+        <x-admin.field label="Ditampilkan sebagai" name="tampil_sebagai" required hint="Nama yang boleh muncul di daftar donatur website.">
+            <select id="tampil_sebagai" name="tampil_sebagai" required class="admin-input sm:w-1/2" @error('tampil_sebagai') aria-invalid="true" aria-describedby="tampil_sebagai-error" @enderror>
+                @foreach (TampilanDonatur::cases() as $tampilan)
+                    <option value="{{ $tampilan->value }}" @selected(old('tampil_sebagai', $donasi->tampil_sebagai?->value) === $tampilan->value)>{{ $tampilan->value }}</option>
+                @endforeach
+            </select>
         </x-admin.field>
 
         <div class="grid gap-5 sm:grid-cols-2">
@@ -33,6 +42,10 @@
                 <input id="email" name="email" type="email" value="{{ old('email', $donasi->email) }}" class="admin-input" @error('email') aria-invalid="true" aria-describedby="email-error" @enderror>
             </x-admin.field>
         </div>
+
+        <x-admin.field label="Alamat" name="alamat">
+            <textarea id="alamat" name="alamat" rows="2" maxlength="500" class="admin-input" @error('alamat') aria-invalid="true" aria-describedby="alamat-error" @enderror>{{ old('alamat', $donasi->alamat) }}</textarea>
+        </x-admin.field>
 
         <div class="grid gap-5 sm:grid-cols-2">
             <x-admin.field label="Program" name="program" required>

@@ -37,10 +37,10 @@
                     @csrf
 
                     <div>
-                        <label for="email" class="block text-sm text-[#1e2328]">Email</label>
-                        <input id="email" name="email" type="email" value="{{ old('email') }}" required autofocus autocomplete="username" placeholder="admin@contoh.com" @error('email') aria-invalid="true" aria-describedby="email-error" @enderror class="mt-1.5 h-[46px] w-full rounded-lg border border-field px-4 text-sm placeholder:text-[#8a929a] focus:border-brand-red focus:ring-4 focus:ring-brand-red/15 focus:outline-none aria-invalid:border-brand-red">
-                        @error('email')
-                            <p id="email-error" class="mt-1.5 text-xs text-brand-red">{{ $message }}</p>
+                        <label for="login" class="block text-sm text-[#1e2328]">Email atau username</label>
+                        <input id="login" name="login" type="text" value="{{ old('login') }}" required autofocus autocomplete="username" placeholder="admin@contoh.com" @error('login') aria-invalid="true" aria-describedby="login-error" @enderror class="mt-1.5 h-[46px] w-full rounded-lg border border-field px-4 text-sm placeholder:text-[#8a929a] focus:border-brand-red focus:ring-4 focus:ring-brand-red/15 focus:outline-none aria-invalid:border-brand-red">
+                        @error('login')
+                            <p id="login-error" class="mt-1.5 text-xs text-brand-red">{{ $message }}</p>
                         @enderror
                     </div>
 

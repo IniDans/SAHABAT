@@ -7,14 +7,14 @@
             ['label' => 'Profil panti', 'icon' => 'building', 'route' => null],
         ],
         'Konten' => [
-            ['label' => 'Kelola berita', 'icon' => 'file-text', 'route' => 'admin.berita.index'],
+            ['label' => 'Kelola artikel kegiatan', 'icon' => 'file-text', 'route' => 'admin.berita.index'],
             ['label' => 'Kelola program', 'icon' => 'clipboard', 'route' => null],
             ['label' => 'Kelola galeri', 'icon' => 'image', 'route' => null],
         ],
         'Layanan' => [
             ['label' => 'Kebutuhan panti', 'icon' => 'package', 'route' => 'admin.kebutuhan-panti.index'],
             ['label' => 'Donasi', 'icon' => 'heart', 'route' => 'admin.donasi.index'],
-            ['label' => 'Pesan masuk', 'icon' => 'mail', 'route' => null, 'badge' => 7],
+            ['label' => 'Pesan masuk', 'icon' => 'mail', 'route' => 'admin.pesan.index', 'badge' => $jumlahPesanBaru ?: null],
         ],
         'Data' => [
             ['label' => 'Data anak panti', 'icon' => 'users', 'route' => null],
@@ -94,9 +94,11 @@
                     <button type="button" class="flex size-9 items-center justify-center rounded-full text-slate hover:bg-white" aria-label="Notifikasi">
                         <x-admin.icon name="bell" width="20" height="20" />
                     </button>
-                    <a href="#" class="relative flex size-9 items-center justify-center rounded-full text-slate hover:bg-white" aria-label="Pesan masuk (7 belum dibaca)">
+                    <a href="{{ route('admin.pesan.index', $jumlahPesanBaru ? ['status' => \App\Enums\StatusPesan::BelumDibaca->value] : []) }}" class="relative flex size-9 items-center justify-center rounded-full text-slate hover:bg-white" aria-label="Pesan masuk ({{ $jumlahPesanBaru }} belum dibaca)">
                         <x-admin.icon name="mail" width="20" height="20" />
-                        <span class="absolute top-1.5 right-1.5 size-2 rounded-full bg-[#dc3c45] ring-2 ring-[#f3f4f2]"></span>
+                        @if ($jumlahPesanBaru)
+                            <span class="absolute top-1.5 right-1.5 size-2 rounded-full bg-[#dc3c45] ring-2 ring-[#f3f4f2]"></span>
+                        @endif
                     </a>
                     <span class="flex size-9 items-center justify-center rounded-full bg-[#2e7d5b] text-sm font-semibold text-white" title="{{ auth()->user()->name }}" aria-label="{{ auth()->user()->name }}">{{ str(auth()->user()->name)->substr(0, 1)->upper() }}</span>
                 </div>

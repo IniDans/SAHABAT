@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Admin;
 
+use App\Enums\KategoriKebutuhan;
 use App\Enums\PrioritasKebutuhan;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
@@ -26,6 +27,7 @@ class KebutuhanPantiRequest extends FormRequest
     {
         return [
             'nama' => ['required', 'string', 'max:255'],
+            'kategori' => ['required', Rule::enum(KategoriKebutuhan::class)],
             'jumlah' => ['nullable', 'integer', 'min:1'],
             'satuan' => ['nullable', 'string', 'max:30'],
             'prioritas' => ['required', Rule::enum(PrioritasKebutuhan::class)],

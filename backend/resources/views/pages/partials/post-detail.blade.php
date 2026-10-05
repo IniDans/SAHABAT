@@ -14,7 +14,8 @@
         </div>
 
         <footer class="mt-6 flex items-center gap-2 border-t border-[#e6e6e6] pt-4">
-            <img src="{{ asset('images/icons/tag.svg') }}" alt="" width="16.02" height="16">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" class="text-[#a4afba]" aria-hidden="true"><path d="M3 6a2 2 0 0 1 2-2h4.17a2 2 0 0 1 1.42.59L12 6h7a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6Z" /></svg>
+            <span class="sr-only">Kategori:</span>
             <a href="{{ route($indexRoute, ['kategori' => 'ramadhan']) }}" class="font-open text-sm text-[#a4afba] hover:text-brand-red">Ramadhan</a>
         </footer>
     </article>
@@ -71,11 +72,11 @@
 
             <div class="mt-3">
                 <label for="donor-program" class="sr-only">Program donasi</label>
-                <x-form.select id="donor-program" :options="['ramadhan' => 'Ramadhan', 'zakat' => 'ZAKAT', 'pendidikan' => 'Pendidikan']" selected="ramadhan" class="h-[38px] text-sm" />
+                <x-form.select id="donor-program" :options="['zakat' => 'Zakat', 'infak' => 'Infak', 'sedekah' => 'Sedekah', 'wakaf' => 'Wakaf', 'beasiswa' => 'Beasiswa']" selected="sedekah" class="h-[38px] text-sm" />
             </div>
 
             <table class="mt-3 w-full font-open text-sm">
-                <caption class="sr-only">Donatur program Ramadhan</caption>
+                <caption class="sr-only">Daftar donatur</caption>
                 <tbody>
                     @foreach ($donors as $donor)
                         <tr class="border-t border-[#dee2e6] odd:bg-black/5" data-donor-row>

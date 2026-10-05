@@ -38,22 +38,24 @@
                 <a href="#" class="text-xs text-slate hover:text-[#1e2328]">Lihat semua</a>
             </div>
             <ul class="divide-y divide-[#f0f0f0]">
-                @foreach ($messages as $message)
+                @forelse ($messages as $message)
                     @php
-                        $initials = collect(explode(' ', $message['name']))->take(2)->map(fn (string $word): string => mb_substr($word, 0, 1))->implode('');
+                        $initials = collect(explode(' ', $message['name']))->take(2)->map(fn (string $word): string => mb_strtoupper(mb_substr($word, 0, 1)))->implode('');
                     @endphp
                     <li class="flex items-center gap-3 px-5 py-3">
                         <span class="flex size-9 shrink-0 items-center justify-center rounded-full bg-[#e3f1ea] text-xs font-semibold text-footer">{{ $initials }}</span>
                         <div class="min-w-0 flex-1">
                             <p class="truncate text-[13px] font-semibold">
                                 {{ $message['name'] }}
-                                <span class="ml-1 font-normal text-slate">· {{ $message['role'] }}</span>
+                                <span class="ml-1 font-normal text-slate">· {{ $message['email'] }}</span>
                             </p>
-                            <p class="truncate text-xs text-slate">{{ $message['subject'] }}</p>
+                            <p @class(['truncate text-xs', 'font-semibold text-[#1e2328]' => $message['unread'], 'text-slate' => ! $message['unread']])>{{ $message['subject'] }}</p>
                         </div>
                         <time class="shrink-0 text-[11px] text-slate-light">{{ $message['time'] }}</time>
                     </li>
-                @endforeach
+                @empty
+                    <li class="px-5 py-10 text-center text-[13px] text-slate">Belum ada pesan.</li>
+                @endforelse
             </ul>
         </section>
 

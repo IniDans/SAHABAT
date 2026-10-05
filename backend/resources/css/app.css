@@ -55,7 +55,11 @@
     }
 
     .form-control {
-        @apply h-[42px] w-full rounded border border-field bg-white px-3 font-open text-sm text-[#495057] placeholder:text-placeholder focus:border-[#86b7fe] focus:ring-4 focus:ring-[#0d6efd]/25 focus:outline-none;
+        @apply h-[42px] w-full rounded border border-field bg-white px-3 font-open text-sm text-[#495057] placeholder:text-placeholder focus:border-[#86b7fe] focus:ring-4 focus:ring-[#0d6efd]/25 focus:outline-none aria-invalid:border-[red];
+    }
+
+    .form-error {
+        @apply mt-1 text-[13px] text-[red];
     }
 
     select.form-control {
@@ -96,11 +100,75 @@
     }
 
     .admin-icon-btn {
-        @apply inline-flex size-8 items-center justify-center rounded-lg text-slate transition hover:bg-[#f3f4f2] hover:text-[#1e2328] focus-visible:ring-4 focus-visible:ring-footer/20 focus-visible:outline-none;
+        @apply inline-flex size-8 items-center justify-center rounded-lg border border-[#e5e5e5] bg-white text-slate transition hover:bg-[#f3f4f2] hover:text-[#1e2328] focus-visible:ring-4 focus-visible:ring-footer/20 focus-visible:outline-none;
     }
 
     .admin-card {
         @apply rounded-xl border border-[#e5e5e5] bg-white;
+    }
+
+    /* Editor artikel */
+    .editor-btn {
+        @apply inline-flex h-8 min-w-8 items-center justify-center rounded-md px-2 text-[13px] text-slate transition hover:bg-white hover:text-[#1e2328] focus-visible:ring-2 focus-visible:ring-footer/30 focus-visible:outline-none aria-pressed:bg-white aria-pressed:text-footer aria-pressed:shadow-sm;
+    }
+
+    .kategori-chip {
+        @apply rounded-full bg-[#eef0ee] px-3 py-1 text-xs font-medium text-[#1e2328] transition hover:bg-[#e3f1ea] focus-visible:ring-2 focus-visible:ring-footer/30 focus-visible:outline-none aria-pressed:bg-footer aria-pressed:text-white;
+    }
+
+    /* Isi di editor memakai tipografi panel admin, bukan tipografi halaman publik. */
+    .isi-editor {
+        @apply font-poppins text-[13.5px] leading-[1.6] text-[#1e2328];
+    }
+
+    .isi-editor > * + * {
+        @apply mt-3;
+    }
+
+    .isi-editor h2 {
+        @apply mt-6 text-lg font-semibold;
+    }
+
+    .isi-editor h3 {
+        @apply mt-5 text-[15px] font-semibold;
+    }
+
+    .isi-editor ul {
+        @apply list-disc pl-6;
+    }
+
+    .isi-editor ol {
+        @apply list-decimal pl-6;
+    }
+
+    .isi-editor li + li {
+        @apply mt-1;
+    }
+
+    .isi-editor blockquote {
+        @apply border-l-4 border-footer bg-[#f3f8f5] py-2 pr-4 pl-4 italic;
+    }
+
+    .isi-editor a {
+        @apply text-brand-red underline;
+    }
+
+    .isi-editor [data-baca-juga] a {
+        @apply font-semibold no-underline;
+    }
+
+    .isi-editor img {
+        @apply h-auto max-w-full rounded-lg;
+    }
+
+    .isi-editor img.ProseMirror-selectednode,
+    .isi-editor [data-baca-juga].ProseMirror-selectednode {
+        @apply outline-2 outline-offset-2 outline-footer;
+    }
+
+    .isi-editor p.is-editor-empty:first-child::before {
+        content: attr(data-placeholder);
+        @apply pointer-events-none float-left h-0 text-[#8a929a];
     }
 
     .prose-yasibu {
@@ -129,5 +197,21 @@
 
     .prose-yasibu a {
         @apply text-brand-red hover:underline;
+    }
+
+    .prose-yasibu blockquote {
+        @apply my-5 border-l-4 border-footer bg-[#f3f8f5] py-3 pr-4 pl-5 italic;
+    }
+
+    .prose-yasibu blockquote p:last-child {
+        @apply mb-0;
+    }
+
+    .prose-yasibu img {
+        @apply my-5 h-auto max-w-full rounded-lg;
+    }
+
+    .prose-yasibu [data-baca-juga] a {
+        @apply font-bold text-brand-red;
     }
 }
