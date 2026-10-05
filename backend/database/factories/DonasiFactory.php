@@ -5,6 +5,7 @@ namespace Database\Factories;
 use App\Enums\MetodePembayaran;
 use App\Enums\ProgramDonasi;
 use App\Enums\StatusDonasi;
+use App\Enums\TampilanDonatur;
 use App\Models\Donasi;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
@@ -22,6 +23,7 @@ class DonasiFactory extends Factory
     {
         return [
             'nama_donatur' => fake()->name(),
+            'tampil_sebagai' => TampilanDonatur::NamaAsli,
             'no_whatsapp' => '08'.fake()->numerify('##########'),
             'email' => fake()->safeEmail(),
             'program' => fake()->randomElement(ProgramDonasi::cases()),

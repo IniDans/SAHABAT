@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Enums\KategoriKebutuhan;
 use App\Enums\PrioritasKebutuhan;
 use App\Models\KebutuhanPanti;
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -20,6 +21,7 @@ class KebutuhanPantiFactory extends Factory
     {
         return [
             'nama' => fake()->randomElement(['Beras', 'Susu anak', 'Seragam sekolah', 'Buku tulis', 'Minyak goreng']),
+            'kategori' => fake()->randomElement(KategoriKebutuhan::cases()),
             'jumlah' => fake()->numberBetween(1, 100),
             'satuan' => fake()->randomElement(['kg', 'pcs', 'paket', 'liter']),
             'prioritas' => PrioritasKebutuhan::Sedang,

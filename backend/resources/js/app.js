@@ -154,40 +154,6 @@ function initCopyButtons() {
 }
 
 /**
- * Pencarian sederhana pada tabel data anak asuh.
- */
-function initTableFilters() {
-    document.querySelectorAll('[data-table-filter]').forEach((wrapper) => {
-        const input = wrapper.querySelector('[data-table-search]');
-        const rows = [...wrapper.querySelectorAll('[data-table-row]')];
-        const empty = wrapper.querySelector('[data-table-empty]');
-        const info = wrapper.querySelector('[data-table-info]');
-        const total = Number(info?.dataset.total ?? rows.length);
-
-        input?.addEventListener('input', () => {
-            const query = input.value.trim().toLowerCase();
-            let visible = 0;
-
-            rows.forEach((row) => {
-                const isMatch = row.textContent.toLowerCase().includes(query);
-                row.hidden = !isMatch;
-                visible += isMatch ? 1 : 0;
-            });
-
-            if (empty) {
-                empty.hidden = visible > 0;
-            }
-
-            if (info) {
-                info.textContent = query === ''
-                    ? `Menampilkan 1 sampai ${total} dari ${total} data`
-                    : `Menampilkan ${visible === 0 ? 0 : 1} sampai ${visible} dari ${visible} data (disaring dari ${total} data)`;
-            }
-        });
-    });
-}
-
-/**
  * Pencarian pada tabel donatur di sidebar artikel/program.
  */
 function initDonorSearch() {
@@ -217,7 +183,7 @@ function initPaymentLogo() {
     }
 
     const update = () => {
-        logo.hidden = select.value !== 'bca';
+        logo.hidden = select.value !== 'BCA';
     };
 
     select.addEventListener('change', update);
@@ -320,7 +286,6 @@ document.addEventListener('DOMContentLoaded', () => {
     initNavigation();
     initAutosubmit();
     initCopyButtons();
-    initTableFilters();
     initDonorSearch();
     initPaymentLogo();
     initLightbox();

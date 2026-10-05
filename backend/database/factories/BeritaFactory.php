@@ -21,7 +21,7 @@ class BeritaFactory extends Factory
     {
         return [
             'judul' => fake()->sentence(6),
-            'kategori' => fake()->randomElement(KategoriBerita::cases()),
+            'kategori' => fake()->randomElement(KategoriBerita::cases())->value,
             'ringkasan' => fake()->sentence(15),
             'isi' => fake()->paragraphs(3, true),
             'status' => StatusBerita::Terbit,

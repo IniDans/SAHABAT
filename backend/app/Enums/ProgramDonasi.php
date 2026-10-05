@@ -5,7 +5,8 @@ namespace App\Enums;
 enum ProgramDonasi: string
 {
     case Zakat = 'Zakat';
-    case Pendidikan = 'Pendidikan';
-    case Ramadhan = 'Ramadhan';
-    case InfaqSedekah = 'Infaq & Sedekah';
+    case Infak = 'Infak';
+    case Sedekah = 'Sedekah';
+    case Wakaf = 'Wakaf';
+    case Beasiswa = 'Beasiswa';
 }

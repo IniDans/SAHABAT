@@ -5,6 +5,7 @@ namespace App\Http\Requests\Admin;
 use App\Enums\MetodePembayaran;
 use App\Enums\ProgramDonasi;
 use App\Enums\StatusDonasi;
+use App\Enums\TampilanDonatur;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
@@ -20,8 +21,10 @@ class DonasiRequest extends FormRequest
     {
         return [
             'nama_donatur' => ['required', 'string', 'max:255'],
+            'tampil_sebagai' => ['sometimes', Rule::enum(TampilanDonatur::class)],
             'no_whatsapp' => ['nullable', 'string', 'max:20'],
             'email' => ['nullable', 'email', 'max:255'],
+            'alamat' => ['nullable', 'string', 'max:500'],
             'program' => ['required', Rule::enum(ProgramDonasi::class)],
             'nominal' => ['required', 'integer', 'min:1000'],
             'metode_pembayaran' => ['required', Rule::enum(MetodePembayaran::class)],
@@ -38,6 +41,7 @@ class DonasiRequest extends FormRequest
     {
         return [
             'nama_donatur' => 'nama donatur',
+            'tampil_sebagai' => 'ditampilkan sebagai',
             'no_whatsapp' => 'no WhatsApp',
             'metode_pembayaran' => 'metode pembayaran',
             'tanggal_donasi' => 'tanggal donasi',

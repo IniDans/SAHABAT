@@ -33,21 +33,23 @@ class LoginController extends Controller
     public function store(Request $request): RedirectResponse
     {
         $credentials = $request->validate([
-            'email' => ['required', 'email'],
+            'login' => ['required', 'string', 'max:255'],
             'password' => ['required', 'string'],
         ]);
 
-        $user = User::where('email', $credentials['email'])->first();
+        // "Username" memakai kolom name karena tabel users tidak punya kolom username.
+        $kolom = filter_var($credentials['login'], FILTER_VALIDATE_EMAIL) ? 'email' : 'name';
+        $user = User::where($kolom, $credentials['login'])->first();
 
         if (! $user || ! Hash::check($credentials['password'], $user->password)) {
             throw ValidationException::withMessages([
-                'email' => 'Email atau password salah.',
+                'login' => 'Email/username atau password salah.',
             ]);
         }
 
         if (! $user->is_active) {
             throw ValidationException::withMessages([
-                'email' => 'Akun ini sudah dinonaktifkan. Hubungi admin.',
+                'login' => 'Akun ini sudah dinonaktifkan. Hubungi admin.',
             ]);
         }
 

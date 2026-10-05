@@ -2,10 +2,12 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Enums\StatusPesan;
 use App\Http\Controllers\Controller;
 use App\Models\AnakPanti;
 use App\Models\Donasi;
 use App\Models\KebutuhanPanti;
+use App\Models\Pesan;
 use Illuminate\View\View;
 
 class DashboardController extends Controller
@@ -39,29 +41,35 @@ class DashboardController extends Controller
     }
 
     /**
-     * @return list<array{name: string, role: string, subject: string, time: string}>
+     * Lima pesan terbaru dari formulir Kontak.
+     *
+     * @return list<array{name: string, email: string, subject: string, time: string, unread: bool}>
      */
     private function messages(): array
     {
-        return [
-            ['name' => 'Ibu Ratna', 'role' => 'Donatur', 'subject' => 'Ingin berdonasi sembako', 'time' => '5 Okt, 09:12'],
-            ['name' => 'Bapak Andi', 'role' => 'Pengunjung', 'subject' => 'Apakah menerima kunjungan?', 'time' => '5 Okt, 08:40'],
-            ['name' => 'Komunitas Peduli', 'role' => 'Komunitas', 'subject' => 'Rencana bakti sosial', 'time' => '4 Okt, 19:05'],
-            ['name' => 'Dewi Lestari', 'role' => 'Donatur', 'subject' => 'Terima kasih informasinya', 'time' => '4 Okt, 16:20'],
-            ['name' => 'Yayasan Harapan', 'role' => 'Lembaga', 'subject' => 'Permintaan proposal', 'time' => '3 Okt, 11:30'],
-        ];
+        return Pesan::query()
+            ->latest()
+            ->limit(5)
+            ->get()
+            ->map(fn (Pesan $pesan): array => [
+                'name' => $pesan->nama,
+                'email' => $pesan->email,
+                'subject' => $pesan->subjek ?: str($pesan->isi)->limit(60)->value(),
+                'time' => $pesan->created_at->locale('id')->translatedFormat('j M, H:i'),
+                'unread' => $pesan->status === StatusPesan::BelumDibaca,
+            ])
+            ->all();
     }
 
     /**
-     * Empat kebutuhan teratas: yang belum terpenuhi dan skornya tertinggi lebih dulu.
+     * Empat kebutuhan teratas, dari yang paling mendesak.
      *
      * @return list<array{name: string, level: string, score: int, fulfilled: bool}>
      */
     private function needs(): array
     {
         return KebutuhanPanti::query()
-            ->orderBy('terpenuhi')
-            ->orderByDesc('skor_prioritas')
+            ->palingMendesak()
             ->limit(4)
             ->get()
             ->map(fn (KebutuhanPanti $kebutuhan): array => [

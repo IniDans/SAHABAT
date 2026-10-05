@@ -2,7 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\StatusDonasi;
+use App\Http\Requests\DonasiPublikRequest;
+use App\Http\Requests\KontakRequest;
 use App\Models\AnakPanti;
+use App\Models\Donasi;
+use App\Models\Pesan;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\View\View;
 
@@ -59,18 +66,51 @@ class SiteController extends Controller
         return view('pages.tentang.galeri', ['photos' => $photos]);
     }
 
-    public function anakAsuh(): View
+    /**
+     * Simpan pesan dari formulir Kontak agar muncul di menu Pesan masuk admin.
+     */
+    public function kirimPesan(KontakRequest $request): RedirectResponse
     {
-        $children = AnakPanti::aktif()
-            ->orderBy('Nama')
-            ->get(['Nama', 'Jenis_Kelamin', 'Pendidikan'])
-            ->map(fn (AnakPanti $anak): array => [
-                'nama' => $anak->Nama,
-                'jenis_kelamin' => $anak->Jenis_Kelamin->value,
-                'pendidikan' => $anak->Pendidikan,
-            ]);
+        Pesan::create($request->validated());
 
-        return view('pages.tentang.anak-asuh', ['children' => $children]);
+        return to_route('tentang.kontak')
+            ->with('status', 'Terima kasih, pesan Anda sudah terkirim. Kami akan segera membalasnya.');
+    }
+
+    /**
+     * Catat donasi dari formulir publik dengan status Menunggu sampai dana dicek admin.
+     */
+    public function kirimDonasi(DonasiPublikRequest $request): RedirectResponse
+    {
+        $donasi = Donasi::create([
+            ...$request->validated(),
+            'tanggal_donasi' => today(),
+            'status' => StatusDonasi::Menunggu,
+        ]);
+
+        return to_route('donasi.rekening')->with('status', sprintf(
+            'Terima kasih, %s. Donasi %s sebesar %s sudah tercatat. Silakan transfer melalui %s ke rekening di bawah ini.',
+            $donasi->nama_donatur,
+            $donasi->program->value,
+            Donasi::rupiah($donasi->nominal),
+            $donasi->metode_pembayaran->value,
+        ));
+    }
+
+    public function anakAsuh(Request $request): View
+    {
+        $isDescending = $request->query('urut') === 'desc';
+
+        $children = AnakPanti::aktif()
+            ->when($request->filled('q'), fn ($query) => $query->where('Nama', 'like', '%'.$request->string('q')->trim().'%'))
+            ->orderBy('Nama', $isDescending ? 'desc' : 'asc')
+            ->paginate(25, ['Nama', 'Jenis_Kelamin', 'Pendidikan'])
+            ->withQueryString();
+
+        return view('pages.tentang.anak-asuh', [
+            'children' => $children,
+            'isDescending' => $isDescending,
+        ]);
     }
 
     /**

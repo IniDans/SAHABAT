@@ -29,8 +29,8 @@ class BeritaTest extends TestCase
 
     public function test_index_lists_and_filters_berita(): void
     {
-        Berita::factory()->create(['judul' => 'Santunan anak yatim', 'kategori' => KategoriBerita::Kegiatan]);
-        Berita::factory()->draft()->create(['judul' => 'Pengajian rutin', 'kategori' => KategoriBerita::Agama]);
+        Berita::factory()->create(['judul' => 'Santunan anak yatim', 'kategori' => KategoriBerita::Kegiatan->value]);
+        Berita::factory()->draft()->create(['judul' => 'Pengajian rutin', 'kategori' => KategoriBerita::Agama->value]);
 
         $this->actingAs(User::factory()->create())
             ->get(route('admin.berita.index'))
@@ -54,8 +54,8 @@ class BeritaTest extends TestCase
             ->assertOk();
 
         $this->post(route('admin.berita.store'), $this->payload(['gambar' => UploadedFile::fake()->image('kegiatan.jpg')]))
-            ->assertRedirect(route('admin.berita.index'))
-            ->assertSessionHas('status');
+            ->assertRedirect(route('admin.berita.edit', Berita::sole()))
+            ->assertSessionHas('status', 'Artikel diterbitkan.');
 
         $berita = Berita::sole();
         $this->assertSame('Buka puasa bersama', $berita->judul);
@@ -77,8 +77,8 @@ class BeritaTest extends TestCase
     public function test_invalid_input_is_rejected(): void
     {
         $this->actingAs(User::factory()->create())
-            ->post(route('admin.berita.store'), $this->payload(['judul' => '', 'kategori' => 'Gosip']))
-            ->assertSessionHasErrors(['judul', 'kategori']);
+            ->post(route('admin.berita.store'), $this->payload(['judul' => '', 'kategori' => '', 'ringkasan' => str_repeat('a', 161), 'isi' => '<p> </p>']))
+            ->assertSessionHasErrors(['judul', 'kategori', 'ringkasan', 'isi']);
 
         $this->assertDatabaseCount('berita', 0);
     }
@@ -94,7 +94,7 @@ class BeritaTest extends TestCase
             ->assertSee($berita->judul);
 
         $this->put(route('admin.berita.update', $berita), $this->payload(['judul' => 'Judul baru', 'gambar' => UploadedFile::fake()->image('baru.jpg')]))
-            ->assertRedirect(route('admin.berita.index'));
+            ->assertRedirect(route('admin.berita.edit', $berita));
 
         $berita->refresh();
         $this->assertSame('judul-baru', $berita->slug);
@@ -112,6 +112,69 @@ class BeritaTest extends TestCase
 
         $this->assertNull($berita->refresh()->gambar);
         Storage::disk('public')->assertMissing($lama);
+    }
+
+    public function test_aksi_button_decides_the_status(): void
+    {
+        $this->actingAs(User::factory()->create())
+            ->post(route('admin.berita.store'), $this->payload(['aksi' => 'draf']))
+            ->assertSessionHas('status', 'Artikel disimpan sebagai draf.');
+
+        $berita = Berita::sole();
+        $this->assertSame(StatusBerita::Draft, $berita->status);
+
+        $this->put(route('admin.berita.update', $berita), $this->payload(['status' => StatusBerita::Draft->value, 'aksi' => 'terbitkan']));
+
+        $this->assertSame(StatusBerita::Terbit, $berita->refresh()->status);
+    }
+
+    public function test_isi_is_sanitized(): void
+    {
+        $isi = '<h2 style="color:red">Kegiatan</h2><p onclick="alert(1)">Halo <strong>semua</strong></p>'
+            .'<script>alert(1)</script><p data-baca-juga=""><a href="/artikel/lain">Baca juga: Lain</a></p>'
+            .'<p><a href="javascript:alert(1)">jahat</a></p>';
+
+        $this->actingAs(User::factory()->create())
+            ->post(route('admin.berita.store'), $this->payload(['isi' => $isi]));
+
+        $tersimpan = Berita::sole()->isi;
+        $this->assertStringContainsString('<h2>Kegiatan</h2>', $tersimpan);
+        $this->assertStringContainsString('<strong>semua</strong>', $tersimpan);
+        $this->assertStringContainsString('data-baca-juga', $tersimpan);
+        $this->assertStringContainsString('href="/artikel/lain"', $tersimpan);
+        $this->assertStringNotContainsString('script', $tersimpan);
+        $this->assertStringNotContainsString('onclick', $tersimpan);
+        $this->assertStringNotContainsString('style', $tersimpan);
+        $this->assertStringNotContainsString('javascript:', $tersimpan);
+    }
+
+    public function test_new_kategori_is_saved_and_case_is_unified(): void
+    {
+        $this->actingAs(User::factory()->create())
+            ->post(route('admin.berita.store'), $this->payload(['kategori' => '  ramadhan  ceria ']));
+
+        $this->assertSame('Ramadhan ceria', Berita::sole()->kategori);
+        $this->assertContains('Ramadhan ceria', Berita::daftarKategori());
+
+        $this->post(route('admin.berita.store'), $this->payload(['judul' => 'Lain', 'kategori' => 'RAMADHAN CERIA']));
+
+        $this->assertSame('Ramadhan ceria', Berita::latest('id')->first()->kategori);
+    }
+
+    public function test_editor_can_upload_images(): void
+    {
+        $this->post(route('admin.berita.gambar'))->assertNotFound();
+
+        $response = $this->actingAs(User::factory()->create())
+            ->postJson(route('admin.berita.gambar'), ['gambar' => UploadedFile::fake()->image('isi.jpg')])
+            ->assertOk();
+
+        $path = str($response->json('url'))->after('/storage/')->value();
+        $this->assertStringStartsWith(Berita::GAMBAR_FOLDER.'/isi/', $path);
+        Storage::disk('public')->assertExists($path);
+
+        $this->postJson(route('admin.berita.gambar'), ['gambar' => UploadedFile::fake()->create('dokumen.pdf', 10, 'application/pdf')])
+            ->assertJsonValidationErrors('gambar');
     }
 
     public function test_only_admin_can_delete_berita(): void
