@@ -21,10 +21,12 @@
                         <x-admin.icon :name="$stat['icon']" />
                     </span>
                 </div>
-                <a href="#" class="mt-auto flex items-center gap-1 border-t border-[#e5e5e5] px-5 py-3 text-xs text-slate hover:text-[#1e2328]">
-                    Lihat semua
-                    <x-admin.icon name="chevron-right" width="14" height="14" />
-                </a>
+                @if ($stat['url'])
+                    <a href="{{ $stat['url'] }}" class="mt-auto flex items-center gap-1 border-t border-[#e5e5e5] px-5 py-3 text-xs text-slate hover:text-[#1e2328]">
+                        Lihat semua
+                        <x-admin.icon name="chevron-right" width="14" height="14" />
+                    </a>
+                @endif
             </article>
         @endforeach
     </div>
@@ -58,10 +60,10 @@
         <section class="rounded-xl border border-[#e5e5e5] bg-white" aria-labelledby="kebutuhan-mendesak">
             <div class="flex items-center justify-between border-b border-[#e5e5e5] px-5 py-4">
                 <h2 id="kebutuhan-mendesak" class="text-[15px] font-semibold">Kebutuhan mendesak</h2>
-                <a href="#" class="text-xs text-slate hover:text-[#1e2328]">Lihat semua</a>
+                <a href="{{ route('admin.kebutuhan-panti.index') }}" class="text-xs text-slate hover:text-[#1e2328]">Lihat semua</a>
             </div>
             <ul class="divide-y divide-[#f0f0f0]">
-                @foreach ($needs as $need)
+                @forelse ($needs as $need)
                     <li class="px-5 py-3">
                         <div class="flex items-center gap-2">
                             <p class="flex-1 text-[13px] font-semibold">{{ $need['name'] }}</p>
@@ -81,7 +83,11 @@
                             </p>
                         </div>
                     </li>
-                @endforeach
+                @empty
+                    <li class="px-5 py-8 text-center text-[13px] text-slate">
+                        Belum ada kebutuhan. <a href="{{ route('admin.kebutuhan-panti.create') }}" class="font-medium text-footer hover:underline">Tambah kebutuhan</a>
+                    </li>
+                @endforelse
             </ul>
         </section>
     </div>

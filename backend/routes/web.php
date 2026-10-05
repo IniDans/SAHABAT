@@ -1,6 +1,10 @@
 <?php
 
+use App\Http\Controllers\Admin\BeritaController;
 use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Admin\DonasiController;
+use App\Http\Controllers\Admin\KebutuhanPantiController;
+use App\Http\Controllers\Admin\LoginController;
 use App\Http\Controllers\SiteController;
 use Illuminate\Support\Facades\Route;
 
@@ -28,7 +32,32 @@ Route::prefix('tentang-kami')->name('tentang.')->group(function () {
     Route::get('anak-asuh', [SiteController::class, 'anakAsuh'])->name('anak-asuh');
 });
 
-Route::prefix('admin')->name('admin.')->group(function () {
-    Route::view('login', 'admin.login')->name('login');
-    Route::get('/', DashboardController::class)->name('dashboard');
+// Login admin sengaja tidak ditautkan dari halaman mana pun; buka langsung lewat /login.
+Route::middleware('guest')->group(function () {
+    Route::get('login', [LoginController::class, 'create'])->name('login');
+    Route::post('login', [LoginController::class, 'store'])->middleware('throttle:6,1')->name('login.store');
+});
+
+Route::middleware('auth')->group(function () {
+    Route::post('logout', [LoginController::class, 'destroy'])->name('logout');
+
+    Route::prefix('admin')->name('admin.')->group(function () {
+        Route::get('/', DashboardController::class)->name('dashboard');
+
+        // Menghapus data hanya boleh dilakukan admin, sama seperti di API.
+        Route::resource('berita', BeritaController::class)
+            ->except('show')
+            ->parameters(['berita' => 'berita'])
+            ->middlewareFor('destroy', 'can:admin');
+
+        Route::resource('kebutuhan-panti', KebutuhanPantiController::class)
+            ->except('show')
+            ->middlewareFor('destroy', 'can:admin');
+
+        Route::patch('donasi/{donasi}/status', [DonasiController::class, 'updateStatus'])->name('donasi.status');
+        Route::resource('donasi', DonasiController::class)
+            ->except('show')
+            ->parameters(['donasi' => 'donasi'])
+            ->middlewareFor('destroy', 'can:admin');
+    });
 });

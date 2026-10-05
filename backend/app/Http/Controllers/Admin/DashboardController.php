@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\AnakPanti;
+use App\Models\Donasi;
+use App\Models\KebutuhanPanti;
 use Illuminate\View\View;
 
 class DashboardController extends Controller
@@ -21,14 +23,18 @@ class DashboardController extends Controller
     }
 
     /**
-     * @return list<array{label: string, value: string, icon: string, tone: string}>
+     * @return list<array{label: string, value: string, icon: string, tone: string, url: string|null}>
      */
     private function stats(): array
     {
+        $donasiBulanIni = (int) Donasi::diterima()
+            ->whereBetween('tanggal_donasi', [now()->startOfMonth()->toDateString(), now()->endOfMonth()->toDateString()])
+            ->sum('nominal');
+
         return [
-            ['label' => 'Anak panti', 'value' => (string) AnakPanti::aktif()->count(), 'icon' => 'users', 'tone' => 'green'],
-            ['label' => 'Kebutuhan mendesak', 'value' => '5', 'icon' => 'package', 'tone' => 'red'],
-            ['label' => 'Donasi bulan ini', 'value' => 'Rp 12,5 jt', 'icon' => 'heart', 'tone' => 'purple'],
+            ['label' => 'Anak panti', 'value' => (string) AnakPanti::aktif()->count(), 'icon' => 'users', 'tone' => 'green', 'url' => null],
+            ['label' => 'Kebutuhan mendesak', 'value' => (string) KebutuhanPanti::mendesak()->count(), 'icon' => 'package', 'tone' => 'red', 'url' => route('admin.kebutuhan-panti.index', ['prioritas' => 'Mendesak', 'status' => 'belum'])],
+            ['label' => 'Donasi bulan ini', 'value' => $this->rupiahSingkat($donasiBulanIni), 'icon' => 'heart', 'tone' => 'purple', 'url' => route('admin.donasi.index', ['status' => 'Diterima', 'dari' => now()->startOfMonth()->toDateString()])],
         ];
     }
 
@@ -47,15 +53,39 @@ class DashboardController extends Controller
     }
 
     /**
+     * Empat kebutuhan teratas: yang belum terpenuhi dan skornya tertinggi lebih dulu.
+     *
      * @return list<array{name: string, level: string, score: int, fulfilled: bool}>
      */
     private function needs(): array
     {
-        return [
-            ['name' => 'Beras 50 kg', 'level' => 'Mendesak', 'score' => 95, 'fulfilled' => false],
-            ['name' => 'Susu dan vitamin anak', 'level' => 'Mendesak', 'score' => 88, 'fulfilled' => false],
-            ['name' => 'Seragam sekolah', 'level' => 'Sedang', 'score' => 62, 'fulfilled' => false],
-            ['name' => 'Buku tulis', 'level' => 'Sedang', 'score' => 50, 'fulfilled' => true],
-        ];
+        return KebutuhanPanti::query()
+            ->orderBy('terpenuhi')
+            ->orderByDesc('skor_prioritas')
+            ->limit(4)
+            ->get()
+            ->map(fn (KebutuhanPanti $kebutuhan): array => [
+                'name' => $kebutuhan->nama,
+                'level' => $kebutuhan->prioritas->value,
+                'score' => $kebutuhan->skor_prioritas,
+                'fulfilled' => $kebutuhan->terpenuhi,
+            ])
+            ->all();
+    }
+
+    /**
+     * Nominal ringkas untuk kartu statistik, mis. "Rp 12,5 jt".
+     */
+    private function rupiahSingkat(int $nominal): string
+    {
+        foreach ([1_000_000_000 => 'M', 1_000_000 => 'jt'] as $satuan => $label) {
+            if ($nominal >= $satuan) {
+                $angka = rtrim(rtrim(number_format($nominal / $satuan, 1, ',', '.'), '0'), ',');
+
+                return "Rp {$angka} {$label}";
+            }
+        }
+
+        return Donasi::rupiah($nominal);
     }
 }

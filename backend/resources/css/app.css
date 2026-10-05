@@ -70,6 +70,39 @@
         @apply inline-flex h-11 items-center justify-center rounded bg-brand-blue px-6 font-open text-base text-white transition hover:bg-[#3367d6] focus-visible:ring-4 focus-visible:ring-brand-blue/30 focus-visible:outline-none;
     }
 
+    /* Panel admin */
+    .admin-label {
+        @apply mb-1.5 block text-[13px] font-medium text-[#1e2328];
+    }
+
+    .admin-input {
+        @apply h-10 w-full rounded-lg border border-[#d9dcd9] bg-white px-3 text-sm text-[#1e2328] placeholder:text-[#8a929a] focus:border-footer focus:ring-4 focus:ring-footer/15 focus:outline-none aria-invalid:border-[#dc3c45];
+    }
+
+    textarea.admin-input {
+        @apply h-auto py-2.5;
+    }
+
+    .admin-btn {
+        @apply inline-flex h-10 items-center justify-center gap-2 rounded-lg px-4 text-[13px] font-medium transition focus-visible:ring-4 focus-visible:outline-none;
+    }
+
+    .admin-btn-primary {
+        @apply bg-footer text-white hover:bg-footer-dark focus-visible:ring-footer/30;
+    }
+
+    .admin-btn-secondary {
+        @apply border border-[#d9dcd9] bg-white text-[#1e2328] hover:bg-[#f3f4f2] focus-visible:ring-footer/20;
+    }
+
+    .admin-icon-btn {
+        @apply inline-flex size-8 items-center justify-center rounded-lg text-slate transition hover:bg-[#f3f4f2] hover:text-[#1e2328] focus-visible:ring-4 focus-visible:ring-footer/20 focus-visible:outline-none;
+    }
+
+    .admin-card {
+        @apply rounded-xl border border-[#e5e5e5] bg-white;
+    }
+
     .prose-yasibu {
         @apply font-open text-[15px] leading-6 text-ink;
     }
