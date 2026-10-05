@@ -31,12 +31,17 @@
             <div class="w-full max-w-[421px] rounded-xl bg-white px-6 pt-3 pb-9 shadow-2xl sm:px-9">
                 <img src="{{ asset('images/logo-yasibu.png') }}" alt="" width="100" height="36" class="mx-auto h-9 w-auto">
                 <h1 class="mt-2 text-[26px] leading-tight font-semibold text-[#1e2328]">Login Admin</h1>
-                <p class="mt-1 text-sm text-slate">Masuk untuk mengelola data .</p>
+                <p class="mt-1 text-sm text-slate">Masuk untuk mengelola data panti.</p>
 
-                <form action="{{ route('admin.dashboard') }}" method="GET" class="mt-9 space-y-5">
+                <form action="{{ route('login.store') }}" method="POST" class="mt-9 space-y-5">
+                    @csrf
+
                     <div>
-                        <label for="login" class="block text-sm text-[#1e2328]">Email atau username</label>
-                        <input id="login" name="login" type="text" required autocomplete="username" placeholder="admin@contoh.com" class="mt-1.5 h-[46px] w-full rounded-lg border border-field px-4 text-sm placeholder:text-[#8a929a] focus:border-brand-red focus:ring-4 focus:ring-brand-red/15 focus:outline-none">
+                        <label for="email" class="block text-sm text-[#1e2328]">Email</label>
+                        <input id="email" name="email" type="email" value="{{ old('email') }}" required autofocus autocomplete="username" placeholder="admin@contoh.com" @error('email') aria-invalid="true" aria-describedby="email-error" @enderror class="mt-1.5 h-[46px] w-full rounded-lg border border-field px-4 text-sm placeholder:text-[#8a929a] focus:border-brand-red focus:ring-4 focus:ring-brand-red/15 focus:outline-none aria-invalid:border-brand-red">
+                        @error('email')
+                            <p id="email-error" class="mt-1.5 text-xs text-brand-red">{{ $message }}</p>
+                        @enderror
                     </div>
 
                     <div>
@@ -48,6 +53,9 @@
                                 <x-admin.icon name="eye-off" width="24" height="24" class="hidden" data-icon-hide />
                             </button>
                         </div>
+                        @error('password')
+                            <p class="mt-1.5 text-xs text-brand-red">{{ $message }}</p>
+                        @enderror
                     </div>
 
                     <div class="flex items-center justify-between text-sm">

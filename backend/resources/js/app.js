@@ -302,6 +302,19 @@ function initAdminSidebar() {
     });
 }
 
+/**
+ * Form dengan atribut data-confirm meminta konfirmasi sebelum dikirim, mis. tombol hapus.
+ */
+function initConfirmForms() {
+    document.querySelectorAll('form[data-confirm]').forEach((form) => {
+        form.addEventListener('submit', (event) => {
+            if (!window.confirm(form.dataset.confirm)) {
+                event.preventDefault();
+            }
+        });
+    });
+}
+
 document.addEventListener('DOMContentLoaded', () => {
     initSliders();
     initNavigation();
@@ -313,4 +326,5 @@ document.addEventListener('DOMContentLoaded', () => {
     initLightbox();
     initPasswordToggle();
     initAdminSidebar();
+    initConfirmForms();
 });
