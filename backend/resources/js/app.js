@@ -673,6 +673,37 @@ function initGrafikTren() {
     });
 }
 
+/**
+ * Daftar baris berulang (x-admin.repeater): tombol tambah menyalin <template>, tombol hapus membuang barisnya.
+ */
+function initRepeater() {
+    document.querySelectorAll('[data-repeater]').forEach((repeater) => {
+        const daftar = repeater.querySelector('[data-repeater-daftar]');
+        const template = repeater.querySelector('template[data-repeater-template]');
+        let indeks = Number(repeater.dataset.repeaterIndeks);
+
+        repeater.querySelector('[data-repeater-tambah]')?.addEventListener('click', () => {
+            const baris = template.content.firstElementChild.cloneNode(true);
+
+            baris.querySelectorAll('[id], [for], [name]').forEach((elemen) => {
+                ['id', 'for', 'name'].forEach((atribut) => {
+                    if (elemen.hasAttribute(atribut)) {
+                        elemen.setAttribute(atribut, elemen.getAttribute(atribut).replace('__INDEX__', String(indeks)));
+                    }
+                });
+            });
+            indeks += 1;
+
+            daftar.append(baris);
+            baris.querySelector('input, textarea')?.focus();
+        });
+
+        daftar.addEventListener('click', (event) => {
+            event.target.closest('[data-repeater-hapus]')?.closest('[data-repeater-baris]')?.remove();
+        });
+    });
+}
+
 document.addEventListener('DOMContentLoaded', () => {
     initSliders();
     initNavigation();
@@ -690,4 +721,5 @@ document.addEventListener('DOMContentLoaded', () => {
     initAnakForm();
     initEksporAnak();
     initGrafikTren();
+    initRepeater();
 });

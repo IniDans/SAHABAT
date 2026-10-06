@@ -74,6 +74,15 @@
         @apply inline-flex h-11 items-center justify-center rounded bg-brand-blue px-6 font-open text-base text-white transition hover:bg-[#3367d6] focus-visible:ring-4 focus-visible:ring-brand-blue/30 focus-visible:outline-none;
     }
 
+    /* Login dan reset password admin */
+    .auth-input {
+        @apply h-[46px] w-full rounded-lg border border-field px-4 text-sm placeholder:text-[#8a929a] focus:border-brand-red focus:ring-4 focus:ring-brand-red/15 focus:outline-none aria-invalid:border-brand-red;
+    }
+
+    .auth-btn {
+        @apply flex h-12 w-full items-center justify-center rounded-lg border border-[#a3141c] bg-[#dc3c45] text-sm text-white transition hover:bg-brand-red focus-visible:ring-4 focus-visible:ring-brand-red/30 focus-visible:outline-none;
+    }
+
     /* Panel admin */
     .admin-label {
         @apply mb-1.5 block text-[13px] font-medium text-[#1e2328];

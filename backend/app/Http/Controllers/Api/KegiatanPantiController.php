@@ -88,7 +88,7 @@ class KegiatanPantiController extends Controller
     public function uploadFoto(Request $request, KegiatanPanti $kegiatanPanti): KegiatanPantiResource
     {
         $request->validate([
-            'foto' => ['required', 'image', 'max:2048'],
+            'foto' => ['required', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
         ]);
 
         $old = $kegiatanPanti->fotoPath();
