@@ -67,7 +67,7 @@ class UserController extends Controller
 
         // Akun yang dinonaktifkan langsung keluar dari semua perangkat.
         if (! $user->is_active) {
-            $user->tokens()->delete();
+            $user->cabutSemuaAkses();
         }
 
         return new UserResource($user);

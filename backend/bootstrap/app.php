@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Middleware\HeaderKeamanan;
+use App\Http\Middleware\PastikanAkunAktif;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -22,13 +24,25 @@ return Application::configure(basePath: dirname(__DIR__))
 
             $api->group(base_path('routes/api.php'));
 
+            // Panel admin didaftarkan sebelum website agar "/" di subdomain admin menuju dashboard.
+            $admin = Route::middleware('web');
+
+            if ($domain = config('app.admin_domain')) {
+                $admin->domain($domain);
+            }
+
+            $admin->group(base_path('routes/admin.php'));
+
             Route::middleware('web')->group(base_path('routes/web.php'));
         },
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        $middleware->append(HeaderKeamanan::class);
+        $middleware->alias(['aktif' => PastikanAkunAktif::class]);
+
         // Tamu yang membuka panel admin mendapat 404 agar alamat /login tidak terungkap.
         $middleware->redirectGuestsTo(function (Request $request) {
-            abort_if($request->is('admin', 'admin/*'), 404);
+            abort_if($request->routeIs('admin.*'), 404);
 
             return route('login');
         });

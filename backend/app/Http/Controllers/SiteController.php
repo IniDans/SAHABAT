@@ -10,7 +10,9 @@ use App\Models\AnakPanti;
 use App\Models\Berita;
 use App\Models\Donasi;
 use App\Models\FotoGaleri;
+use App\Models\KebutuhanPanti;
 use App\Models\Pesan;
+use App\Models\ProfilPanti;
 use App\Models\Program;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -49,6 +51,36 @@ class SiteController extends Controller
     public function artikelShow(string $slug): View
     {
         return $this->detailTulisan(Berita::class, $slug, 'pages.artikel.show');
+    }
+
+    /**
+     * Formulir donasi, dengan daftar kebutuhan panti yang belum terpenuhi.
+     */
+    public function formulirDonasi(): View
+    {
+        return view('pages.donasi.formulir', [
+            'kebutuhan' => KebutuhanPanti::where('terpenuhi', false)->palingMendesak()->limit(8)->get(),
+        ]);
+    }
+
+    public function profil(): View
+    {
+        return view('pages.tentang.profil', ['profil' => ProfilPanti::bagian('lembaga')]);
+    }
+
+    public function visiMisi(): View
+    {
+        return view('pages.tentang.visi-misi', ['profil' => ProfilPanti::bagian('visi_misi')]);
+    }
+
+    public function pengurus(): View
+    {
+        return view('pages.tentang.pengurus', ['profil' => ProfilPanti::bagian('pengurus')]);
+    }
+
+    public function kontak(): View
+    {
+        return view('pages.tentang.kontak', ['profil' => ProfilPanti::bagian('kontak')]);
     }
 
     public function galeri(): View

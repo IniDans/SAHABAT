@@ -18,7 +18,7 @@ class UserManagementTest extends TestCase
         $this->postJson('/api/users', [
             'name' => 'Siti',
             'email' => 'siti@example.com',
-            'password' => 'rahasia-123',
+            'password' => 'Rahasia-123',
             'role' => 'pengurus',
         ])->assertCreated()
             ->assertJsonPath('data.role', 'pengurus')
@@ -26,7 +26,7 @@ class UserManagementTest extends TestCase
 
         $this->postJson('/api/auth/login', [
             'email' => 'siti@example.com',
-            'password' => 'rahasia-123',
+            'password' => 'Rahasia-123',
         ])->assertOk();
     }
 
