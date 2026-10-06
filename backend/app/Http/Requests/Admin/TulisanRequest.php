@@ -58,7 +58,7 @@ abstract class TulisanRequest extends FormRequest
             'ringkasan' => ['nullable', 'string', 'max:160'],
             'isi' => ['required', 'string'],
             'status' => ['required', Rule::enum(StatusBerita::class)],
-            'gambar' => ['nullable', 'image', 'max:2048'],
+            'gambar' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
             'hapus_gambar' => ['boolean'],
         ];
     }

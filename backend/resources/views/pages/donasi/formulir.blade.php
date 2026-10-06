@@ -11,6 +11,31 @@
     <x-page-header title="Formulir Donasi" :breadcrumbs="['Formulir Donasi' => null]" />
 
     <section class="mx-auto w-full max-w-[1726px] px-4 py-8 lg:px-[77px] lg:pt-5 lg:pb-[60px]">
+        @if ($kebutuhan->isNotEmpty())
+            <section class="mb-10 rounded border border-[#e6e6e6] bg-white p-5 shadow-sm" aria-labelledby="kebutuhan-panti">
+                <h2 id="kebutuhan-panti" class="font-raleway text-xl font-bold text-ink-dark">Kebutuhan Panti Saat Ini</h2>
+                <p class="mt-1 font-open text-sm text-slate-light">Selain uang, Anda juga bisa membantu dengan barang berikut. Untuk donasi barang, silakan <a href="{{ route('tentang.kontak') }}" class="text-brand-red hover:underline">hubungi kami</a>.</p>
+                <ul class="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+                    @foreach ($kebutuhan as $item)
+                        <li class="rounded border border-[#e6e6e6] px-4 py-3 font-open">
+                            <div class="flex items-start justify-between gap-2">
+                                <p class="font-semibold text-ink-dark">{{ $item->nama }}</p>
+                                @if ($item->prioritas === \App\Enums\PrioritasKebutuhan::Mendesak)
+                                    <span class="shrink-0 rounded-full bg-[#fde8e9] px-2 py-0.5 text-xs font-semibold text-[#c0262f]">Mendesak</span>
+                                @endif
+                            </div>
+                            <p class="mt-1 text-sm text-slate-light">
+                                {{ $item->kategori->value }}@if ($item->jumlah) &middot; {{ number_format($item->jumlah, 0, ',', '.') }} {{ $item->satuan }}@endif
+                            </p>
+                            @if ($item->keterangan)
+                                <p class="mt-1 line-clamp-2 text-sm text-ink">{{ $item->keterangan }}</p>
+                            @endif
+                        </li>
+                    @endforeach
+                </ul>
+            </section>
+        @endif
+
         <form action="{{ route('donasi.formulir.store') }}" method="POST" class="space-y-6">
             @csrf
 

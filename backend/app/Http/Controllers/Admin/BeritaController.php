@@ -98,7 +98,7 @@ class BeritaController extends Controller
     public function unggahGambar(Request $request): JsonResponse
     {
         $request->validate([
-            'gambar' => ['required', 'image', 'max:2048'],
+            'gambar' => ['required', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
         ]);
 
         $path = $request->file('gambar')->store(Berita::GAMBAR_FOLDER.'/isi', 'public');

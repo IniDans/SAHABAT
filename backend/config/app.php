@@ -98,6 +98,19 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Admin Domain
+    |--------------------------------------------------------------------------
+    |
+    | Subdomain panel admin, misalnya "admin.sahabat.test". Login ada di
+    | "/login" dan dashboard di "/" pada subdomain itu. Jika dikosongkan,
+    | panel admin ada di domain utama dengan prefix "/admin".
+    |
+    */
+
+    'admin_domain' => env('ADMIN_DOMAIN'),
+
+    /*
+    |--------------------------------------------------------------------------
     | Encryption Key
     |--------------------------------------------------------------------------
     |

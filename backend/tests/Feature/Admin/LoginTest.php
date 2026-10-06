@@ -68,4 +68,55 @@ class LoginTest extends TestCase
 
         $this->assertGuest();
     }
+
+    public function test_login_is_locked_after_five_wrong_passwords(): void
+    {
+        $user = User::factory()->create();
+
+        foreach (range(1, 5) as $percobaan) {
+            $this->post('/login', ['login' => $user->email, 'password' => 'salah']);
+        }
+
+        $this->post('/login', ['login' => $user->email, 'password' => 'password'])
+            ->assertSessionHasErrors(['login' => 'Terlalu banyak percobaan login. Coba lagi dalam 15 menit.']);
+
+        $this->assertGuest();
+    }
+
+    public function test_passwords_are_stored_as_salted_argon2id_hashes(): void
+    {
+        $pertama = User::factory()->create(['password' => 'Rahasia-123']);
+        $kedua = User::factory()->create(['password' => 'Rahasia-123']);
+
+        $this->assertSame('argon2id', password_get_info($pertama->password)['algoName']);
+        $this->assertNotSame($pertama->password, $kedua->password);
+        $this->assertStringNotContainsString('Rahasia-123', $pertama->password);
+    }
+
+    public function test_old_bcrypt_hash_is_upgraded_to_argon2id_on_login(): void
+    {
+        $user = User::factory()->create();
+        // Hash lama sudah ada di database, jadi ditulis langsung tanpa cast "hashed".
+        User::whereKey($user->id)->toBase()->update(['password' => password_hash('password', PASSWORD_BCRYPT)]);
+
+        $this->post('/login', ['login' => $user->email, 'password' => 'password'])
+            ->assertRedirect(route('admin.dashboard'));
+
+        $hashBaru = $user->fresh()->password;
+        $this->assertSame('argon2id', password_get_info($hashBaru)['algoName']);
+        $this->assertTrue(password_verify('password', $hashBaru));
+    }
+
+    public function test_open_session_of_a_deactivated_account_is_ended(): void
+    {
+        $user = User::factory()->create();
+        $this->actingAs($user)->get('/admin')->assertOk();
+
+        $user->update(['is_active' => false]);
+
+        $this->get('/admin')
+            ->assertRedirect(route('login'))
+            ->assertSessionHasErrors(['login' => 'Akun ini sudah dinonaktifkan. Hubungi admin.']);
+        $this->assertGuest();
+    }
 }

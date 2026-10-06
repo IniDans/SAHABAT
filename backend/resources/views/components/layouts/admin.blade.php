@@ -4,7 +4,7 @@
     $menu = [
         null => [
             ['label' => 'Dashboard', 'icon' => 'dashboard', 'route' => 'admin.dashboard'],
-            ['label' => 'Profil panti', 'icon' => 'building', 'route' => null],
+            ['label' => 'Profil panti', 'icon' => 'building', 'route' => 'admin.profil.edit'],
         ],
         'Konten' => [
             ['label' => 'Kelola artikel kegiatan', 'icon' => 'file-text', 'route' => 'admin.berita.index'],
@@ -19,7 +19,14 @@
         'Data' => [
             ['label' => 'Data anak panti', 'icon' => 'users', 'route' => 'admin.anak-panti.index'],
             ['label' => 'Kesehatan anak', 'icon' => 'activity', 'route' => 'admin.kesehatan.index'],
+            ['label' => 'Wali anak', 'icon' => 'home', 'route' => 'admin.wali-anak.index'],
+            ['label' => 'Pengasuh', 'icon' => 'user', 'route' => 'admin.pengasuh.index'],
+            ['label' => 'Kegiatan panti', 'icon' => 'calendar', 'route' => 'admin.kegiatan.index'],
         ],
+        'Akun' => array_values(array_filter([
+            auth()->user()->can('admin') ? ['label' => 'Kelola akun', 'icon' => 'user-cog', 'route' => 'admin.akun.index'] : null,
+            ['label' => 'Akun saya', 'icon' => 'shield', 'route' => 'admin.akun-saya.edit'],
+        ])),
     ];
 @endphp
 
@@ -101,7 +108,7 @@
                             <span class="absolute top-1.5 right-1.5 size-2 rounded-full bg-[#dc3c45] ring-2 ring-[#f3f4f2]"></span>
                         @endif
                     </a>
-                    <span class="flex size-9 items-center justify-center rounded-full bg-[#2e7d5b] text-sm font-semibold text-white" title="{{ auth()->user()->name }}" aria-label="{{ auth()->user()->name }}">{{ str(auth()->user()->name)->substr(0, 1)->upper() }}</span>
+                    <a href="{{ route('admin.akun-saya.edit') }}" class="flex size-9 items-center justify-center rounded-full bg-[#2e7d5b] text-sm font-semibold text-white hover:ring-2 hover:ring-[#2e7d5b]/30" title="{{ auth()->user()->name }}" aria-label="Akun saya ({{ auth()->user()->name }})">{{ str(auth()->user()->name)->substr(0, 1)->upper() }}</a>
                 </div>
 
                 <main class="flex-1 px-4 pt-4 pb-10 sm:px-8">

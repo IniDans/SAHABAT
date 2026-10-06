@@ -7,6 +7,7 @@ use App\Enums\ProgramDonasi;
 use App\Enums\StatusDonasi;
 use App\Enums\TampilanDonatur;
 use App\Models\Donasi;
+use App\Models\KebutuhanPanti;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -52,6 +53,18 @@ class FormulirDonasiTest extends TestCase
         ]))->assertSessionHasErrors(['nominal', 'tampil_sebagai', 'no_whatsapp']);
 
         $this->assertDatabaseCount('donasi', 0);
+    }
+
+    public function test_donation_page_lists_unfulfilled_needs_most_urgent_first(): void
+    {
+        KebutuhanPanti::factory()->create(['nama' => 'Seragam sekolah', 'skor_prioritas' => 40]);
+        KebutuhanPanti::factory()->mendesak()->create(['nama' => 'Beras', 'skor_prioritas' => 95]);
+        KebutuhanPanti::factory()->terpenuhi()->create(['nama' => 'Buku tulis']);
+
+        $this->get(route('donasi.formulir'))
+            ->assertOk()
+            ->assertSeeInOrder(['Kebutuhan Panti Saat Ini', 'Beras', 'Seragam sekolah'])
+            ->assertDontSee('Buku tulis');
     }
 
     /**
