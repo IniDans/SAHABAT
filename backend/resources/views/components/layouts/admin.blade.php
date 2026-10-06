@@ -7,17 +7,18 @@
             ['label' => 'Profil panti', 'icon' => 'building', 'route' => null],
         ],
         'Konten' => [
-            ['label' => 'Kelola artikel kegiatan', 'icon' => 'file-text', 'route' => null],
-            ['label' => 'Kelola program', 'icon' => 'clipboard', 'route' => null],
-            ['label' => 'Kelola galeri', 'icon' => 'image', 'route' => null],
+            ['label' => 'Kelola artikel kegiatan', 'icon' => 'file-text', 'route' => 'admin.berita.index'],
+            ['label' => 'Kelola program', 'icon' => 'clipboard', 'route' => 'admin.program.index'],
+            ['label' => 'Kelola galeri', 'icon' => 'image', 'route' => 'admin.galeri.index'],
         ],
         'Layanan' => [
-            ['label' => 'Kebutuhan panti', 'icon' => 'package', 'route' => null],
-            ['label' => 'Donasi', 'icon' => 'heart', 'route' => null],
-            ['label' => 'Pesan masuk', 'icon' => 'mail', 'route' => null, 'badge' => 7],
+            ['label' => 'Kebutuhan panti', 'icon' => 'package', 'route' => 'admin.kebutuhan-panti.index'],
+            ['label' => 'Donasi', 'icon' => 'heart', 'route' => 'admin.donasi.index'],
+            ['label' => 'Pesan masuk', 'icon' => 'mail', 'route' => 'admin.pesan.index', 'badge' => $jumlahPesanBaru ?: null],
         ],
         'Data' => [
-            ['label' => 'Data anak panti', 'icon' => 'users', 'route' => null],
+            ['label' => 'Data anak panti', 'icon' => 'users', 'route' => 'admin.anak-panti.index'],
+            ['label' => 'Kesehatan anak', 'icon' => 'activity', 'route' => 'admin.kesehatan.index'],
         ],
     ];
 @endphp
@@ -58,7 +59,8 @@
                             <ul class="space-y-1">
                                 @foreach ($items as $item)
                                     @php
-                                        $isActive = $item['route'] && request()->routeIs($item['route']);
+                                        // Menu tetap aktif di halaman tambah/ubah, mis. admin.berita.* untuk admin.berita.index.
+                                        $isActive = $item['route'] && request()->routeIs($item['route'], str($item['route'])->beforeLast('.index')->append('.*')->value());
                                     @endphp
                                     <li>
                                         <a href="{{ $item['route'] ? route($item['route']) : '#' }}" @class([
@@ -79,10 +81,13 @@
                     @endforeach
                 </nav>
 
-                <a href="{{ route('admin.login') }}" class="mt-8 flex items-center gap-3 rounded-lg px-3 py-2.5 text-[13px] hover:bg-white/10">
-                    <x-admin.icon name="log-out" class="shrink-0" />
-                    Keluar
-                </a>
+                <form action="{{ route('logout') }}" method="POST" class="mt-8">
+                    @csrf
+                    <button type="submit" class="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-[13px] hover:bg-white/10">
+                        <x-admin.icon name="log-out" class="shrink-0" />
+                        Keluar
+                    </button>
+                </form>
             </aside>
 
             <div class="flex min-w-0 flex-1 flex-col">
@@ -90,14 +95,23 @@
                     <button type="button" class="flex size-9 items-center justify-center rounded-full text-slate hover:bg-white" aria-label="Notifikasi">
                         <x-admin.icon name="bell" width="20" height="20" />
                     </button>
-                    <a href="#" class="relative flex size-9 items-center justify-center rounded-full text-slate hover:bg-white" aria-label="Pesan masuk (7 belum dibaca)">
+                    <a href="{{ route('admin.pesan.index', $jumlahPesanBaru ? ['status' => \App\Enums\StatusPesan::BelumDibaca->value] : []) }}" class="relative flex size-9 items-center justify-center rounded-full text-slate hover:bg-white" aria-label="Pesan masuk ({{ $jumlahPesanBaru }} belum dibaca)">
                         <x-admin.icon name="mail" width="20" height="20" />
-                        <span class="absolute top-1.5 right-1.5 size-2 rounded-full bg-[#dc3c45] ring-2 ring-[#f3f4f2]"></span>
+                        @if ($jumlahPesanBaru)
+                            <span class="absolute top-1.5 right-1.5 size-2 rounded-full bg-[#dc3c45] ring-2 ring-[#f3f4f2]"></span>
+                        @endif
                     </a>
-                    <span class="flex size-9 items-center justify-center rounded-full bg-[#2e7d5b] text-sm font-semibold text-white" aria-label="Admin">A</span>
+                    <span class="flex size-9 items-center justify-center rounded-full bg-[#2e7d5b] text-sm font-semibold text-white" title="{{ auth()->user()->name }}" aria-label="{{ auth()->user()->name }}">{{ str(auth()->user()->name)->substr(0, 1)->upper() }}</span>
                 </div>
 
                 <main class="flex-1 px-4 pt-4 pb-10 sm:px-8">
+                    @session('status')
+                        <div class="mb-5 flex items-center gap-2 rounded-lg border border-[#bfe3cf] bg-[#e3f1ea] px-4 py-3 text-[13px] text-footer-dark" role="status">
+                            <x-admin.icon name="check" width="16" height="16" class="shrink-0" />
+                            {{ $value }}
+                        </div>
+                    @endsession
+
                     {{ $slot }}
                 </main>
             </div>
