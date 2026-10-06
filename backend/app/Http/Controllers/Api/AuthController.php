@@ -3,43 +3,23 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\LoginRequest;
 use App\Http\Resources\UserResource;
-use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules\Password;
-use Illuminate\Validation\ValidationException;
+use Laravel\Sanctum\PersonalAccessToken;
 
 class AuthController extends Controller
 {
     /**
      * Log in and issue an API token.
      */
-    public function login(Request $request): JsonResponse
+    public function login(LoginRequest $request): JsonResponse
     {
-        $credentials = $request->validate([
-            'email' => ['required', 'email'],
-            'password' => ['required', 'string'],
-            'device_name' => ['nullable', 'string', 'max:100'],
-        ]);
-
-        $user = User::where('email', $credentials['email'])->first();
-
-        if (! $user || ! Hash::check($credentials['password'], $user->password)) {
-            throw ValidationException::withMessages([
-                'email' => 'Email atau password salah.',
-            ]);
-        }
-
-        if (! $user->is_active) {
-            throw ValidationException::withMessages([
-                'email' => 'Akun ini sudah dinonaktifkan. Hubungi admin.',
-            ]);
-        }
-
-        $token = $user->createToken($credentials['device_name'] ?? 'api')->plainTextToken;
+        $user = $request->autentikasi();
+        $token = $user->createToken($request->validated('device_name') ?? 'api')->plainTextToken;
 
         return response()->json([
             'token' => $token,
@@ -75,7 +55,12 @@ class AuthController extends Controller
             'password' => ['required', 'confirmed', Password::defaults()],
         ]);
 
-        $request->user()->update(['password' => $validated['password']]);
+        $user = $request->user();
+        $user->update(['password' => $validated['password']]);
+
+        // Perangkat lain harus login ulang dengan password baru; token yang sedang dipakai tetap berlaku.
+        $tokenSekarang = $user->currentAccessToken();
+        $user->cabutSemuaAkses($tokenSekarang instanceof PersonalAccessToken ? $tokenSekarang->getKey() : null);
 
         return response()->noContent();
     }

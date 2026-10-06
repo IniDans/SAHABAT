@@ -74,16 +74,16 @@ class AuthTest extends TestCase
 
         $this->putJson('/api/auth/password', [
             'current_password' => 'salah',
-            'password' => 'password-baru-123',
-            'password_confirmation' => 'password-baru-123',
+            'password' => 'Password-baru-123',
+            'password_confirmation' => 'Password-baru-123',
         ])->assertUnprocessable()->assertJsonValidationErrors('current_password');
 
         $this->putJson('/api/auth/password', [
             'current_password' => 'password',
-            'password' => 'password-baru-123',
-            'password_confirmation' => 'password-baru-123',
+            'password' => 'Password-baru-123',
+            'password_confirmation' => 'Password-baru-123',
         ])->assertNoContent();
 
-        $this->assertTrue(password_verify('password-baru-123', $user->fresh()->password));
+        $this->assertTrue(password_verify('Password-baru-123', $user->fresh()->password));
     }
 }
