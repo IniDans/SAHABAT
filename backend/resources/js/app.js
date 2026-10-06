@@ -222,6 +222,50 @@ function initPaymentLogo() {
 }
 
 /**
+ * Formulir donasi: pilihan "Nama yang ditampilkan" mengisi input nama.
+ * Anonim mengunci input, Hamba Allah mengisi teks tetapi tetap bisa diedit
+ * (mengedit memindahkan pilihan ke Nama asli), Nama asli memakai nama terakhir yang diketik.
+ */
+function initNamaDonatur() {
+    const wrapper = document.querySelector('[data-nama-donatur]');
+    const input = wrapper?.querySelector('[data-nama-input]');
+    const radios = [...(wrapper?.querySelectorAll('[data-tampilan]') ?? [])];
+
+    if (!input || radios.length === 0) {
+        return;
+    }
+
+    const radio = (tampilan) => radios.find((item) => item.dataset.tampilan === tampilan);
+    const terpilih = () => radios.find((item) => item.checked)?.dataset.tampilan;
+    const teksTetap = [radio('Anonim')?.value, radio('HambaAllah')?.value];
+
+    let namaDiketik = teksTetap.includes(input.value) ? '' : input.value;
+
+    const terapkan = () => {
+        const tampilan = terpilih();
+        input.readOnly = tampilan === 'Anonim';
+
+        if (tampilan === 'NamaAsli') {
+            input.value = namaDiketik;
+        } else if (tampilan) {
+            input.value = radio(tampilan).value;
+        }
+    };
+
+    radios.forEach((item) => item.addEventListener('change', terapkan));
+
+    input.addEventListener('input', () => {
+        if (terpilih() === 'HambaAllah') {
+            radio('NamaAsli').checked = true;
+        }
+
+        namaDiketik = input.value;
+    });
+
+    terapkan();
+}
+
+/**
  * Lightbox galeri memakai elemen <dialog>.
  */
 function initLightbox() {
@@ -711,6 +755,7 @@ document.addEventListener('DOMContentLoaded', () => {
     initCopyButtons();
     initDonorSearch();
     initPaymentLogo();
+    initNamaDonatur();
     initLightbox();
     initPasswordToggle();
     initAdminSidebar();
