@@ -59,10 +59,10 @@
                 @enderror
             </div>
 
-            <div class="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,560px)] lg:gap-x-[60px]">
+            <div class="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,560px)] lg:gap-x-[60px]" data-nama-donatur>
                 <div>
                     <label for="nama_donatur" class="form-label">Nama <span class="required">*</span></label>
-                    <input id="nama_donatur" name="nama_donatur" type="text" required maxlength="255" value="{{ old('nama_donatur') }}" placeholder="Nama" autocomplete="name" class="form-control" @error('nama_donatur') aria-invalid="true" @enderror>
+                    <input id="nama_donatur" name="nama_donatur" type="text" required maxlength="255" value="{{ old('nama_donatur') }}" placeholder="Nama" autocomplete="name" class="form-control read-only:bg-[#e9ecef]" data-nama-input @error('nama_donatur') aria-invalid="true" @enderror>
                     @error('nama_donatur')
                         <p class="form-error">{{ $message }}</p>
                     @enderror
@@ -73,7 +73,7 @@
                     <div class="mt-2 flex flex-wrap gap-x-6 gap-y-2">
                         @foreach (TampilanDonatur::cases() as $tampilan)
                             <label class="flex items-center gap-2 font-open text-sm font-bold text-ink">
-                                <input type="radio" name="tampil_sebagai" value="{{ $tampilan->value }}" @checked(old('tampil_sebagai', TampilanDonatur::HambaAllah->value) === $tampilan->value) class="size-[13px] accent-[#0075ff]">
+                                <input type="radio" name="tampil_sebagai" value="{{ $tampilan->value }}" @checked(old('tampil_sebagai', TampilanDonatur::HambaAllah->value) === $tampilan->value) data-tampilan="{{ $tampilan->name }}" class="size-[13px] accent-[#0075ff]">
                                 {{ $tampilan->value }}
                             </label>
                         @endforeach
