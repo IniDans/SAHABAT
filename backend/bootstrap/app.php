@@ -26,7 +26,14 @@ return Application::configure(basePath: dirname(__DIR__))
         },
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        //
+        // Tamu yang membuka panel admin mendapat 404 agar alamat /login tidak terungkap.
+        $middleware->redirectGuestsTo(function (Request $request) {
+            abort_if($request->is('admin', 'admin/*'), 404);
+
+            return route('login');
+        });
+
+        $middleware->redirectUsersTo(fn () => route('admin.dashboard'));
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->shouldRenderJsonWhen(

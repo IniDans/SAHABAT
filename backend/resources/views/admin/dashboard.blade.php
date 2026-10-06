@@ -21,47 +21,53 @@
                         <x-admin.icon :name="$stat['icon']" />
                     </span>
                 </div>
-                <a href="#" class="mt-auto flex items-center gap-1 border-t border-[#e5e5e5] px-5 py-3 text-xs text-slate hover:text-[#1e2328]">
-                    Lihat semua
-                    <x-admin.icon name="chevron-right" width="14" height="14" />
-                </a>
+                @if ($stat['url'])
+                    <a href="{{ $stat['url'] }}" class="mt-auto flex items-center gap-1 border-t border-[#e5e5e5] px-5 py-3 text-xs text-slate hover:text-[#1e2328]">
+                        Lihat semua
+                        <x-admin.icon name="chevron-right" width="14" height="14" />
+                    </a>
+                @endif
             </article>
         @endforeach
     </div>
+
+    @include('admin.partials.pantau-kesehatan', $kesehatan)
 
     <div class="mt-6 grid gap-5 xl:grid-cols-2">
         <section class="rounded-xl border border-[#e5e5e5] bg-white" aria-labelledby="pesan-masuk">
             <div class="flex items-center justify-between border-b border-[#e5e5e5] px-5 py-4">
                 <h2 id="pesan-masuk" class="text-[15px] font-semibold">Pesan masuk</h2>
-                <a href="#" class="text-xs text-slate hover:text-[#1e2328]">Lihat semua</a>
+                <a href="{{ route('admin.pesan.index') }}" class="text-xs text-slate hover:text-[#1e2328]">Lihat semua</a>
             </div>
             <ul class="divide-y divide-[#f0f0f0]">
-                @foreach ($messages as $message)
+                @forelse ($messages as $message)
                     @php
-                        $initials = collect(explode(' ', $message['name']))->take(2)->map(fn (string $word): string => mb_substr($word, 0, 1))->implode('');
+                        $initials = collect(explode(' ', $message['name']))->take(2)->map(fn (string $word): string => mb_strtoupper(mb_substr($word, 0, 1)))->implode('');
                     @endphp
                     <li class="flex items-center gap-3 px-5 py-3">
                         <span class="flex size-9 shrink-0 items-center justify-center rounded-full bg-[#e3f1ea] text-xs font-semibold text-footer">{{ $initials }}</span>
                         <div class="min-w-0 flex-1">
                             <p class="truncate text-[13px] font-semibold">
                                 {{ $message['name'] }}
-                                <span class="ml-1 font-normal text-slate">· {{ $message['role'] }}</span>
+                                <span class="ml-1 font-normal text-slate">· {{ $message['email'] }}</span>
                             </p>
-                            <p class="truncate text-xs text-slate">{{ $message['subject'] }}</p>
+                            <p @class(['truncate text-xs', 'font-semibold text-[#1e2328]' => $message['unread'], 'text-slate' => ! $message['unread']])>{{ $message['subject'] }}</p>
                         </div>
                         <time class="shrink-0 text-[11px] text-slate-light">{{ $message['time'] }}</time>
                     </li>
-                @endforeach
+                @empty
+                    <li class="px-5 py-10 text-center text-[13px] text-slate">Belum ada pesan.</li>
+                @endforelse
             </ul>
         </section>
 
         <section class="rounded-xl border border-[#e5e5e5] bg-white" aria-labelledby="kebutuhan-mendesak">
             <div class="flex items-center justify-between border-b border-[#e5e5e5] px-5 py-4">
                 <h2 id="kebutuhan-mendesak" class="text-[15px] font-semibold">Kebutuhan mendesak</h2>
-                <a href="#" class="text-xs text-slate hover:text-[#1e2328]">Lihat semua</a>
+                <a href="{{ route('admin.kebutuhan-panti.index') }}" class="text-xs text-slate hover:text-[#1e2328]">Lihat semua</a>
             </div>
             <ul class="divide-y divide-[#f0f0f0]">
-                @foreach ($needs as $need)
+                @forelse ($needs as $need)
                     <li class="px-5 py-3">
                         <div class="flex items-center gap-2">
                             <p class="flex-1 text-[13px] font-semibold">{{ $need['name'] }}</p>
@@ -81,7 +87,11 @@
                             </p>
                         </div>
                     </li>
-                @endforeach
+                @empty
+                    <li class="px-5 py-8 text-center text-[13px] text-slate">
+                        Belum ada kebutuhan. <a href="{{ route('admin.kebutuhan-panti.create') }}" class="font-medium text-footer hover:underline">Tambah kebutuhan</a>
+                    </li>
+                @endforelse
             </ul>
         </section>
     </div>
