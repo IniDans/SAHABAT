@@ -49,16 +49,18 @@
         </div>
     </section>
 
-    {{-- Program --}}
-    <section class="bg-surface py-12 lg:pt-[25px] lg:pb-[60px]" aria-labelledby="program-heading">
-        <x-section-heading eyebrow="Program" title="Program Pendidikan" id="program-heading" />
+    {{-- Program: hanya program terbit yang dipilih "Tampil di Beranda" --}}
+    @if ($programs->isNotEmpty())
+        <section class="bg-surface py-12 lg:pt-[25px] lg:pb-[60px]" aria-labelledby="program-heading">
+            <x-section-heading eyebrow="Program" title="Program Pendidikan" id="program-heading" />
 
-        <div class="container-site mt-6 grid gap-x-[22px] gap-y-[34px] sm:grid-cols-2 lg:mt-[7px] lg:grid-cols-3">
-            @foreach ($programs as $program)
-                <x-post-card :post="$program" :url="route('program.show', $program['slug'])" with-excerpt class="lg:min-h-[488px]" />
-            @endforeach
-        </div>
-    </section>
+            <div class="container-site mt-6 grid gap-x-[22px] gap-y-[34px] sm:grid-cols-2 lg:mt-[7px] lg:grid-cols-3">
+                @foreach ($programs as $program)
+                    <x-post-card :post="$program->kartu()" :url="route('program.show', $program->slug)" with-excerpt class="lg:min-h-[488px]" />
+                @endforeach
+            </div>
+        </section>
+    @endif
 
     {{-- Artikel kegiatan --}}
     <section class="bg-surface py-12 lg:pt-[25px] lg:pb-[60px]" aria-labelledby="artikel-heading">
@@ -74,10 +76,16 @@
 
         <div class="container-site mt-[46px] grid gap-x-[22px] gap-y-[34px] sm:grid-cols-2 lg:grid-cols-3">
             @foreach ($articles as $article)
-                <x-post-card :post="$article" :url="route('artikel.show', $article['slug'])" class="lg:min-h-[377px]" />
+                <x-post-card :post="$article->kartu()" :url="route('artikel.show', $article->slug)" class="lg:min-h-[377px]" />
             @endforeach
         </div>
 
-        <x-pagination class="mt-[46px]" :current="1" :last="7" />
+        @if ($articles->isEmpty())
+            <p class="container-site py-12 text-center font-open text-base text-muted">Belum ada artikel kegiatan.</p>
+        @else
+            <div class="mt-[46px] flex justify-center">
+                <a href="{{ route('artikel.index') }}" class="inline-flex h-10 items-center rounded bg-brand-red px-6 font-open text-sm text-white transition hover:bg-[#b81d26]">Lihat semua artikel</a>
+            </div>
+        @endif
     </section>
 </x-layouts.app>

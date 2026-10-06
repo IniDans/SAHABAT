@@ -31,6 +31,6 @@ class DatabaseSeeder extends Seeder
             'role' => Role::Pengurus,
         ]);
 
-        $this->call(DemoSeeder::class);
+        $this->call([DemoSeeder::class, KontenSeeder::class, BeratBadanSeeder::class]);
     }
 }
