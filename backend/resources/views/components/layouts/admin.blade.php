@@ -8,8 +8,8 @@
         ],
         'Konten' => [
             ['label' => 'Kelola artikel kegiatan', 'icon' => 'file-text', 'route' => 'admin.berita.index'],
-            ['label' => 'Kelola program', 'icon' => 'clipboard', 'route' => null],
-            ['label' => 'Kelola galeri', 'icon' => 'image', 'route' => null],
+            ['label' => 'Kelola program', 'icon' => 'clipboard', 'route' => 'admin.program.index'],
+            ['label' => 'Kelola galeri', 'icon' => 'image', 'route' => 'admin.galeri.index'],
         ],
         'Layanan' => [
             ['label' => 'Kebutuhan panti', 'icon' => 'package', 'route' => 'admin.kebutuhan-panti.index'],
@@ -17,7 +17,8 @@
             ['label' => 'Pesan masuk', 'icon' => 'mail', 'route' => 'admin.pesan.index', 'badge' => $jumlahPesanBaru ?: null],
         ],
         'Data' => [
-            ['label' => 'Data anak panti', 'icon' => 'users', 'route' => null],
+            ['label' => 'Data anak panti', 'icon' => 'users', 'route' => 'admin.anak-panti.index'],
+            ['label' => 'Kesehatan anak', 'icon' => 'activity', 'route' => 'admin.kesehatan.index'],
         ],
     ];
 @endphp

@@ -31,11 +31,13 @@
         @endforeach
     </div>
 
+    @include('admin.partials.pantau-kesehatan', $kesehatan)
+
     <div class="mt-6 grid gap-5 xl:grid-cols-2">
         <section class="rounded-xl border border-[#e5e5e5] bg-white" aria-labelledby="pesan-masuk">
             <div class="flex items-center justify-between border-b border-[#e5e5e5] px-5 py-4">
                 <h2 id="pesan-masuk" class="text-[15px] font-semibold">Pesan masuk</h2>
-                <a href="#" class="text-xs text-slate hover:text-[#1e2328]">Lihat semua</a>
+                <a href="{{ route('admin.pesan.index') }}" class="text-xs text-slate hover:text-[#1e2328]">Lihat semua</a>
             </div>
             <ul class="divide-y divide-[#f0f0f0]">
                 @forelse ($messages as $message)

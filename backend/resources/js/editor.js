@@ -358,7 +358,8 @@ function initPratinjau(form, editor) {
 
         dialog.querySelector('[data-pratinjau-h1]').textContent = form.querySelector('[data-judul]').value || 'Tanpa judul';
 
-        const tanggal = form.querySelector('[name="tanggal_terbit"]').value;
+        // Program tidak punya isian tanggal; tanggal terbitnya hari ini saat diterbitkan.
+        const tanggal = form.querySelector('[name="tanggal_terbit"]')?.value ?? new Date().toISOString().slice(0, 10);
         const tanggalTampil = tanggal ? new Date(`${tanggal}T00:00:00`).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }) : '';
         dialog.querySelector('[data-pratinjau-meta]').textContent = [tanggalTampil, form.querySelector('[name="kategori"]').value].filter(Boolean).join(' · ');
 

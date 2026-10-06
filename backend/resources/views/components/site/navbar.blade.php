@@ -1,4 +1,6 @@
 @php
+    use App\Enums\KategoriProgram;
+
     $menu = [
         ['label' => 'Beranda', 'route' => 'beranda', 'active' => 'beranda'],
         ['label' => 'Donasi', 'active' => 'donasi.*', 'children' => [
@@ -8,7 +10,8 @@
             ['label' => 'Rekening Donasi', 'route' => 'donasi.rekening'],
         ]],
         ['label' => 'Program', 'active' => 'program.*', 'children' => [
-            ['label' => 'Pendidikan', 'route' => 'program.index'],
+            ['label' => 'Semua Program', 'route' => 'program.index'],
+            ...array_map(fn (KategoriProgram $kategori): array => ['label' => $kategori->value, 'route' => 'program.index', 'params' => ['kategori' => $kategori->value]], KategoriProgram::cases()),
         ]],
         ['label' => 'Artikel Kegiatan', 'route' => 'artikel.index', 'active' => 'artikel.*'],
         ['label' => 'Tentang Kami', 'active' => 'tentang.*', 'children' => [
@@ -20,6 +23,10 @@
             ['label' => 'Kontak Kami', 'route' => 'tentang.kontak'],
         ]],
     ];
+
+    $childUrl = fn (array $child): string => route($child['route'], $child['params'] ?? []);
+    $isChildActive = fn (array $child): bool => request()->routeIs($child['route'])
+        && collect($child['params'] ?? [])->every(fn (string $nilai, string $kunci): bool => request()->query($kunci) === $nilai);
 @endphp
 
 <header class="relative z-40 bg-white shadow-nav">
@@ -41,7 +48,7 @@
                             <ul class="invisible absolute top-full left-0 min-w-56 translate-y-2 rounded-b border-t-2 border-brand-red bg-white py-2 opacity-0 shadow-card transition group-hover:visible group-hover:translate-y-0 group-hover:opacity-100 group-focus-within:visible group-focus-within:translate-y-0 group-focus-within:opacity-100">
                                 @foreach ($item['children'] as $child)
                                     <li>
-                                        <a href="{{ route($child['route']) }}" class="block px-5 py-2.5 font-poppins text-base {{ request()->routeIs($child['route']) ? 'text-brand-red' : 'text-slate' }} hover:bg-surface hover:text-brand-red">{{ $child['label'] }}</a>
+                                        <a href="{{ $childUrl($child) }}" class="block px-5 py-2.5 font-poppins text-base {{ $isChildActive($child) ? 'text-brand-red' : 'text-slate' }} hover:bg-surface hover:text-brand-red">{{ $child['label'] }}</a>
                                     </li>
                                 @endforeach
                             </ul>
@@ -73,7 +80,7 @@
                         <ul class="{{ $isActive ? '' : 'hidden' }} mb-2 border-l-2 border-brand-red/30 pl-4" data-accordion-panel>
                             @foreach ($item['children'] as $child)
                                 <li>
-                                    <a href="{{ route($child['route']) }}" class="block py-2 font-poppins text-[15px] {{ request()->routeIs($child['route']) ? 'text-brand-red' : 'text-slate' }}">{{ $child['label'] }}</a>
+                                    <a href="{{ $childUrl($child) }}" class="block py-2 font-poppins text-[15px] {{ $isChildActive($child) ? 'text-brand-red' : 'text-slate' }}">{{ $child['label'] }}</a>
                                 </li>
                             @endforeach
                         </ul>

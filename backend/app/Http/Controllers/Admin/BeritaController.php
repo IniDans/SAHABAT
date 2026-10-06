@@ -112,10 +112,9 @@ class BeritaController extends Controller
             'berita' => $berita,
             'daftarKategori' => Berita::daftarKategori(),
             // Pilihan untuk tombol "Baca juga" di editor.
-            'artikelLain' => Berita::query()
-                ->where('status', StatusBerita::Terbit)
+            'tulisanLain' => Berita::query()
+                ->terbit()
                 ->whereKeyNot($berita->getKey())
-                ->latest('tanggal_terbit')
                 ->limit(50)
                 ->get(['judul', 'slug'])
                 ->map(fn (Berita $lain): array => ['judul' => $lain->judul, 'url' => route('artikel.show', $lain->slug, false)])

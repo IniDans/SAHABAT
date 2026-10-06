@@ -1,11 +1,15 @@
 <?php
 
+use App\Http\Controllers\Admin\AnakPantiController;
 use App\Http\Controllers\Admin\BeritaController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\DonasiController;
+use App\Http\Controllers\Admin\GaleriController;
 use App\Http\Controllers\Admin\KebutuhanPantiController;
+use App\Http\Controllers\Admin\KesehatanController;
 use App\Http\Controllers\Admin\LoginController;
 use App\Http\Controllers\Admin\PesanController;
+use App\Http\Controllers\Admin\ProgramController;
 use App\Http\Controllers\SiteController;
 use Illuminate\Support\Facades\Route;
 
@@ -54,10 +58,33 @@ Route::middleware('auth')->group(function () {
             ->parameters(['berita' => 'berita'])
             ->middlewareFor('destroy', 'can:admin');
 
+        Route::post('program/gambar', [ProgramController::class, 'unggahGambar'])->middleware('throttle:30,1')->name('program.gambar');
+        Route::patch('program/{program}/beranda', [ProgramController::class, 'toggleBeranda'])->name('program.beranda');
+        Route::resource('program', ProgramController::class)
+            ->except('show')
+            ->parameters(['program' => 'program'])
+            ->middlewareFor('destroy', 'can:admin');
+
+        Route::patch('galeri/urutan', [GaleriController::class, 'urutkan'])->name('galeri.urutan');
+        Route::delete('galeri', [GaleriController::class, 'hapusBanyak'])->middleware('can:admin')->name('galeri.hapus-banyak');
+        Route::resource('galeri', GaleriController::class)
+            ->only(['index', 'store', 'update', 'destroy'])
+            ->parameters(['galeri' => 'galeri'])
+            ->middlewareFor('destroy', 'can:admin');
+
         Route::patch('kebutuhan-panti/{kebutuhan_panti}/terpenuhi', [KebutuhanPantiController::class, 'toggleTerpenuhi'])->name('kebutuhan-panti.terpenuhi');
         Route::resource('kebutuhan-panti', KebutuhanPantiController::class)
             ->except('show')
             ->middlewareFor('destroy', 'can:admin');
+
+        Route::get('anak-panti/ekspor', [AnakPantiController::class, 'ekspor'])->name('anak-panti.ekspor');
+        Route::resource('anak-panti', AnakPantiController::class)
+            ->only(['index', 'store', 'update', 'destroy'])
+            ->middlewareFor('destroy', 'can:admin');
+
+        Route::get('kesehatan', [KesehatanController::class, 'index'])->name('kesehatan.index');
+        Route::get('kesehatan/timbang', [KesehatanController::class, 'timbang'])->name('kesehatan.timbang');
+        Route::put('kesehatan/timbang', [KesehatanController::class, 'simpan'])->name('kesehatan.simpan');
 
         Route::get('donasi/ekspor', [DonasiController::class, 'ekspor'])->name('donasi.ekspor');
         Route::patch('donasi/{donasi}/status', [DonasiController::class, 'updateStatus'])->name('donasi.status');
