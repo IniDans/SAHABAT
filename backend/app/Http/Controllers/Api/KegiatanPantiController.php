@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\KegiatanPantiRequest;
+use App\Http\Requests\Api\KegiatanPantiRequest;
 use App\Http\Resources\KegiatanPantiResource;
 use App\Models\KegiatanPanti;
 use Illuminate\Http\Request;

@@ -1,5 +1,21 @@
 <?php
 
+/*
+ * Cloudflare R2 (kompatibel S3) untuk server tanpa disk tetap, mis. Vercel.
+ * R2 tidak mengenal ACL per file: akses publik diatur dari pengaturan bucket.
+ */
+$r2 = fn (?string $bucket): array => [
+    'driver' => 's3',
+    'key' => env('R2_ACCESS_KEY_ID'),
+    'secret' => env('R2_SECRET_ACCESS_KEY'),
+    'region' => 'auto',
+    'bucket' => $bucket,
+    'endpoint' => env('R2_ENDPOINT'),
+    'use_path_style_endpoint' => true,
+    'throw' => false,
+    'report' => true,
+];
+
 return [
 
     /*
@@ -38,7 +54,14 @@ return [
             'report' => false,
         ],
 
-        'public' => [
+        // Bucket privat, mis. foto kegiatan anak. Pakai dengan FILESYSTEM_DISK=r2.
+        'r2' => $r2(env('R2_PRIVATE_BUCKET')),
+
+        // Gambar berita, program, dan galeri. Pindah ke bucket R2 publik bila R2_PUBLIC_BUCKET diisi.
+        'public' => env('R2_PUBLIC_BUCKET') ? [
+            ...$r2(env('R2_PUBLIC_BUCKET')),
+            'url' => env('R2_PUBLIC_URL'),
+        ] : [
             'driver' => 'local',
             'root' => storage_path('app/public'),
             'url' => rtrim(env('APP_URL', 'http://localhost'), '/').'/storage',

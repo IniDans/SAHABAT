@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\PengasuhRequest;
+use App\Http\Requests\Api\PengasuhRequest;
 use App\Http\Resources\PengasuhResource;
 use App\Models\Pengasuh;
 use Illuminate\Http\Request;

@@ -3,6 +3,13 @@
 use Illuminate\Support\Str;
 use Pdo\Mysql;
 
+// Sertifikat CA MySQL (mis. Aiven). Path relatif dihitung dari folder backend agar sama di lokal dan Vercel.
+$mysqlSslCa = env('MYSQL_ATTR_SSL_CA');
+
+if ($mysqlSslCa && is_file(base_path($mysqlSslCa))) {
+    $mysqlSslCa = base_path($mysqlSslCa);
+}
+
 return [
 
     /*
@@ -60,7 +67,7 @@ return [
             'strict' => true,
             'engine' => null,
             'options' => extension_loaded('pdo_mysql') ? array_filter([
-                Mysql::ATTR_SSL_CA => env('MYSQL_ATTR_SSL_CA'),
+                Mysql::ATTR_SSL_CA => $mysqlSslCa,
             ]) : [],
         ],
 
