@@ -7,6 +7,7 @@ use App\Models\Pesan;
 use App\Models\ProfilPanti;
 use App\Models\User;
 use Illuminate\Auth\Notifications\ResetPassword;
+use Illuminate\Http\Middleware\TrustProxies;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\URL;
@@ -31,6 +32,11 @@ class AppServiceProvider extends ServiceProvider
     {
         // Hanya admin yang boleh mengelola akun dan menghapus data.
         Gate::define('admin', fn (User $user) => $user->isAdmin());
+
+        // Di belakang proxy hosting, HTTPS dan IP asli dibaca dari header X-Forwarded-*.
+        if ($proxies = config('app.trusted_proxies')) {
+            TrustProxies::at($proxies === '*' ? '*' : explode(',', $proxies));
+        }
 
         // Di production semua tautan memakai HTTPS agar cookie sesi tidak lewat koneksi biasa.
         URL::forceHttps($this->app->isProduction());

@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\AnakPantiRequest;
+use App\Http\Requests\Api\AnakPantiRequest;
 use App\Http\Resources\AnakPantiResource;
 use App\Models\AnakPanti;
 use Illuminate\Http\Request;

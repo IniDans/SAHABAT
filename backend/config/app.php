@@ -111,6 +111,20 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Trusted Proxies
+    |--------------------------------------------------------------------------
+    |
+    | Isi bila aplikasi berjalan di belakang proxy (mis. Vercel), supaya
+    | HTTPS dan IP asli pengunjung terbaca dari header X-Forwarded-*.
+    | "*" untuk semua proxy, atau daftar IP dipisah koma. Kosongkan jika
+    | server langsung menerima koneksi dari internet.
+    |
+    */
+
+    'trusted_proxies' => env('TRUSTED_PROXIES'),
+
+    /*
+    |--------------------------------------------------------------------------
     | Encryption Key
     |--------------------------------------------------------------------------
     |

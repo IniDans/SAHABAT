@@ -1,0 +1,20 @@
+# Jangan ikut terunggah ke Vercel (berlaku juga untuk `vercel deploy` dari komputer sendiri).
+
+# Rahasia dan data pribadi
+.env
+.env.*
+/database/sql/*.sql
+
+# Dibuat ulang saat build di Vercel
+/vendor
+/resources/views
+/public/build
+/public/hot
+/public/storage
+
+# Berkas lokal yang tidak dipakai di Vercel (storage pindah ke /tmp dan R2)
+/storage/app
+/storage/framework
+/storage/logs
+/.phpunit.cache
+/tests

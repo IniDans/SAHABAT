@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\WaliAnakRequest;
+use App\Http\Requests\Api\WaliAnakRequest;
 use App\Http\Resources\WaliAnakResource;
 use App\Models\WaliAnak;
 use Illuminate\Http\Request;
