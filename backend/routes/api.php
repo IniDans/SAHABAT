@@ -6,6 +6,7 @@ use App\Http\Controllers\Api\KegiatanPantiController;
 use App\Http\Controllers\Api\PengasuhController;
 use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\Api\WaliAnakController;
+use App\Http\Controllers\CronController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -19,6 +20,9 @@ use Illuminate\Support\Facades\Route;
 |   - pengurus : lihat, tambah, dan ubah data (tidak bisa menghapus)
 |
 */
+
+// Dipanggil Vercel Cron sekali sehari, dilindungi CRON_SECRET.
+Route::get('cron/bersihkan', CronController::class)->name('cron.bersihkan');
 
 Route::post('auth/login', [AuthController::class, 'login'])
     ->middleware('throttle:6,1')

@@ -118,7 +118,10 @@ class ProgramController extends Controller
 
         $path = $request->file('gambar')->store(Program::GAMBAR_FOLDER.'/isi', 'public');
 
-        return response()->json(['url' => parse_url(Storage::disk('public')->url($path), PHP_URL_PATH)]);
+        $url = Storage::disk('public')->url($path);
+
+        // Disk lokal cukup path-nya agar isi tulisan tidak terikat APP_URL; bucket R2 butuh domainnya.
+        return response()->json(['url' => config('filesystems.disks.public.driver') === 'local' ? parse_url($url, PHP_URL_PATH) : $url]);
     }
 
     private function form(Program $program): View

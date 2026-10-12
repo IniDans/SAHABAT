@@ -1,0 +1,227 @@
+@import 'tailwindcss';
+
+@source '../../backend/vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
+@source '../../backend/storage/framework/views/*.php';
+@source '../../backend/app';
+
+@theme {
+    --font-sans: 'Open Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
+        'Segoe UI Symbol', 'Noto Color Emoji';
+    --font-poppins: 'Poppins', ui-sans-serif, system-ui, sans-serif;
+    --font-raleway: 'Raleway', ui-sans-serif, system-ui, sans-serif;
+    --font-open: 'Open Sans', ui-sans-serif, system-ui, sans-serif;
+
+    --color-brand-red: #d9232d;
+    --color-brand-red-soft: #e6636a;
+    --color-brand-green: #006b3c;
+    --color-brand-blue: #4285f4;
+    --color-footer: #00804b;
+    --color-footer-dark: #005a31;
+    --color-slate: #556270;
+    --color-slate-light: #6b7b8d;
+    --color-muted: #c1c8d0;
+    --color-ink: #444444;
+    --color-ink-dark: #292f36;
+    --color-surface: #f8f9fa;
+    --color-field: #ced4da;
+    --color-placeholder: #6c757d;
+
+    --shadow-card: 0 4px 16px rgba(0, 0, 0, 0.1);
+    --shadow-nav: 0 1px 80px rgba(0, 0, 0, 0.1);
+    --shadow-hero: 0 8px 24px rgba(149, 157, 165, 0.2);
+}
+
+@layer base {
+    body {
+        @apply bg-white font-open text-ink antialiased;
+    }
+
+    [x-cloak],
+    [hidden] {
+        display: none !important;
+    }
+}
+
+@layer components {
+    .container-site {
+        @apply mx-auto w-full max-w-[1172px] px-4;
+    }
+
+    .form-label {
+        @apply mb-2 block font-open text-base font-bold text-ink;
+    }
+
+    .form-label .required {
+        @apply text-[11.2px] font-normal text-[red];
+    }
+
+    .form-control {
+        @apply h-[42px] w-full rounded border border-field bg-white px-3 font-open text-sm text-[#495057] placeholder:text-placeholder focus:border-[#86b7fe] focus:ring-4 focus:ring-[#0d6efd]/25 focus:outline-none aria-invalid:border-[red];
+    }
+
+    .form-error {
+        @apply mt-1 text-[13px] text-[red];
+    }
+
+    select.form-control {
+        @apply h-[38px] appearance-none pr-10 text-base;
+    }
+
+    textarea.form-control {
+        @apply h-auto py-2;
+    }
+
+    .btn-primary {
+        @apply inline-flex h-11 items-center justify-center rounded bg-brand-blue px-6 font-open text-base text-white transition hover:bg-[#3367d6] focus-visible:ring-4 focus-visible:ring-brand-blue/30 focus-visible:outline-none;
+    }
+
+    /* Login dan reset password admin */
+    .auth-input {
+        @apply h-[46px] w-full rounded-lg border border-field px-4 text-sm placeholder:text-[#8a929a] focus:border-brand-red focus:ring-4 focus:ring-brand-red/15 focus:outline-none aria-invalid:border-brand-red;
+    }
+
+    .auth-btn {
+        @apply flex h-12 w-full items-center justify-center rounded-lg border border-[#a3141c] bg-[#dc3c45] text-sm text-white transition hover:bg-brand-red focus-visible:ring-4 focus-visible:ring-brand-red/30 focus-visible:outline-none;
+    }
+
+    /* Panel admin */
+    .admin-label {
+        @apply mb-1.5 block text-[13px] font-medium text-[#1e2328];
+    }
+
+    .admin-input {
+        @apply h-10 w-full rounded-lg border border-[#d9dcd9] bg-white px-3 text-sm text-[#1e2328] placeholder:text-[#8a929a] focus:border-footer focus:ring-4 focus:ring-footer/15 focus:outline-none aria-invalid:border-[#dc3c45];
+    }
+
+    textarea.admin-input {
+        @apply h-auto py-2.5;
+    }
+
+    .admin-btn {
+        @apply inline-flex h-10 items-center justify-center gap-2 rounded-lg px-4 text-[13px] font-medium transition focus-visible:ring-4 focus-visible:outline-none;
+    }
+
+    .admin-btn-primary {
+        @apply bg-footer text-white hover:bg-footer-dark focus-visible:ring-footer/30;
+    }
+
+    .admin-btn-secondary {
+        @apply border border-[#d9dcd9] bg-white text-[#1e2328] hover:bg-[#f3f4f2] focus-visible:ring-footer/20;
+    }
+
+    .admin-icon-btn {
+        @apply inline-flex size-8 items-center justify-center rounded-lg border border-[#e5e5e5] bg-white text-slate transition hover:bg-[#f3f4f2] hover:text-[#1e2328] focus-visible:ring-4 focus-visible:ring-footer/20 focus-visible:outline-none;
+    }
+
+    .admin-card {
+        @apply rounded-xl border border-[#e5e5e5] bg-white;
+    }
+
+    /* Editor artikel */
+    .editor-btn {
+        @apply inline-flex h-8 min-w-8 items-center justify-center rounded-md px-2 text-[13px] text-slate transition hover:bg-white hover:text-[#1e2328] focus-visible:ring-2 focus-visible:ring-footer/30 focus-visible:outline-none aria-pressed:bg-white aria-pressed:text-footer aria-pressed:shadow-sm;
+    }
+
+    .kategori-chip {
+        @apply rounded-full bg-[#eef0ee] px-3 py-1 text-xs font-medium text-[#1e2328] transition hover:bg-[#e3f1ea] focus-visible:ring-2 focus-visible:ring-footer/30 focus-visible:outline-none aria-pressed:bg-footer aria-pressed:text-white;
+    }
+
+    /* Isi di editor memakai tipografi panel admin, bukan tipografi halaman publik. */
+    .isi-editor {
+        @apply font-poppins text-[13.5px] leading-[1.6] text-[#1e2328];
+    }
+
+    .isi-editor > * + * {
+        @apply mt-3;
+    }
+
+    .isi-editor h2 {
+        @apply mt-6 text-lg font-semibold;
+    }
+
+    .isi-editor h3 {
+        @apply mt-5 text-[15px] font-semibold;
+    }
+
+    .isi-editor ul {
+        @apply list-disc pl-6;
+    }
+
+    .isi-editor ol {
+        @apply list-decimal pl-6;
+    }
+
+    .isi-editor li + li {
+        @apply mt-1;
+    }
+
+    .isi-editor blockquote {
+        @apply border-l-4 border-footer bg-[#f3f8f5] py-2 pr-4 pl-4 italic;
+    }
+
+    .isi-editor a {
+        @apply text-brand-red underline;
+    }
+
+    .isi-editor [data-baca-juga] a {
+        @apply font-semibold no-underline;
+    }
+
+    .isi-editor img {
+        @apply h-auto max-w-full rounded-lg;
+    }
+
+    .isi-editor img.ProseMirror-selectednode,
+    .isi-editor [data-baca-juga].ProseMirror-selectednode {
+        @apply outline-2 outline-offset-2 outline-footer;
+    }
+
+    .isi-editor p.is-editor-empty:first-child::before {
+        content: attr(data-placeholder);
+        @apply pointer-events-none float-left h-0 text-[#8a929a];
+    }
+
+    .prose-yasibu {
+        @apply font-open text-[15px] leading-6 text-ink;
+    }
+
+    .prose-yasibu p {
+        @apply mb-4;
+    }
+
+    .prose-yasibu h2 {
+        @apply mt-8 mb-4 font-raleway text-2xl leading-tight font-bold text-ink md:text-[32px] md:leading-[38.4px];
+    }
+
+    .prose-yasibu h3 {
+        @apply mt-6 mb-3 font-raleway text-[22px] leading-[26.4px] font-black text-ink;
+    }
+
+    .prose-yasibu ul {
+        @apply mb-4 list-disc pl-6;
+    }
+
+    .prose-yasibu ol {
+        @apply mb-4 list-decimal pl-6;
+    }
+
+    .prose-yasibu a {
+        @apply text-brand-red hover:underline;
+    }
+
+    .prose-yasibu blockquote {
+        @apply my-5 border-l-4 border-footer bg-[#f3f8f5] py-3 pr-4 pl-5 italic;
+    }
+
+    .prose-yasibu blockquote p:last-child {
+        @apply mb-0;
+    }
+
+    .prose-yasibu img {
+        @apply my-5 h-auto max-w-full rounded-lg;
+    }
+
+    .prose-yasibu [data-baca-juga] a {
+        @apply font-bold text-brand-red;
+    }
+}
