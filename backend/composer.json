@@ -11,6 +11,7 @@
         "laravel/framework": "^13.17",
         "laravel/sanctum": "^4.0",
         "laravel/tinker": "^3.0",
+        "league/flysystem-aws-s3-v3": "^3.0",
         "openspout/openspout": "^5.3",
         "symfony/html-sanitizer": "^7.4"
     },
@@ -42,12 +43,17 @@
             "@php -r \"file_exists('.env') || copy('.env.example', '.env');\"",
             "@php artisan key:generate",
             "@php artisan migrate --force",
-            "npm install --ignore-scripts",
-            "npm run build"
+            "npm install --ignore-scripts --prefix ../frontend",
+            "npm run build --prefix ../frontend"
+        ],
+        "vercel": [
+            "npm ci --ignore-scripts --prefix ../frontend",
+            "npm run build --prefix ../frontend",
+            "rm -rf resources/views && mkdir -p resources && cp -r ../frontend/views resources/views"
         ],
         "dev": [
             "Composer\\Config::disableProcessTimeout",
-            "@php artisan dev"
+            "npm run dev:all --prefix ../frontend"
         ],
         "test": [
             "@php artisan config:clear --ansi @no_additional_args",

@@ -30,7 +30,7 @@ class KegiatanPantiController extends Controller
             ->paginate(10)
             ->withQueryString();
 
-        return view('admin.kegiatan.index', ['kegiatan' => $kegiatan]);
+        return view('admin.kegiatan-panti.index', ['kegiatan' => $kegiatan]);
     }
 
     /**
@@ -38,7 +38,7 @@ class KegiatanPantiController extends Controller
      */
     public function create(): View
     {
-        return view('admin.kegiatan.form', ['kegiatan' => new KegiatanPanti]);
+        return view('admin.kegiatan-panti.form', ['kegiatan' => new KegiatanPanti]);
     }
 
     /**
@@ -58,7 +58,7 @@ class KegiatanPantiController extends Controller
      */
     public function edit(KegiatanPanti $kegiatan): View
     {
-        return view('admin.kegiatan.form', ['kegiatan' => $kegiatan]);
+        return view('admin.kegiatan-panti.form', ['kegiatan' => $kegiatan]);
     }
 
     /**

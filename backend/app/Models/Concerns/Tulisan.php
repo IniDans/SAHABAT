@@ -87,7 +87,7 @@ trait Tulisan
     }
 
     /**
-     * Data untuk komponen kartu (x-post-card) di halaman publik.
+     * Data untuk komponen kartu (x-site.post-card) di halaman publik.
      *
      * @return array{slug: string, title: string, image: string, date: string, date_iso: string, excerpt: string}
      */

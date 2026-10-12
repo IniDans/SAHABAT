@@ -1,0 +1,24 @@
+{
+    "$schema": "https://openapi.vercel.sh/vercel.json",
+    "framework": null,
+    "installCommand": "npm ci --ignore-scripts --prefix ../frontend",
+    "buildCommand": "npm run build --prefix ../frontend",
+    "outputDirectory": "public",
+    "functions": {
+        "api/index.php": {
+            "runtime": "vercel-php@0.7.4",
+            "maxDuration": 30,
+            "excludeFiles": "{.git/**,node_modules/**,tests/**,storage/app/**,storage/framework/**,storage/logs/**,database/sql/**,public/storage/**}"
+        }
+    },
+    "routes": [
+        { "src": "/build/assets/(.*)", "headers": { "cache-control": "public, max-age=31536000, immutable" }, "dest": "/build/assets/$1" },
+        { "src": "/build/(.*)", "dest": "/build/$1" },
+        { "src": "/images/(.*)", "dest": "/images/$1" },
+        { "src": "/(favicon\\.ico|robots\\.txt)", "dest": "/$1" },
+        { "src": "/(.*)", "dest": "/api/index.php" }
+    ],
+    "crons": [
+        { "path": "/api/cron/bersihkan", "schedule": "0 19 * * *" }
+    ]
+}
