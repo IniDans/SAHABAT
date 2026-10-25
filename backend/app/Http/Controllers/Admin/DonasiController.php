@@ -7,10 +7,12 @@ use App\Enums\StatusDonasi;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\DonasiRequest;
 use App\Models\Donasi;
+use App\Services\PembacaBuktiTransfer;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 use Symfony\Component\HttpFoundation\StreamedResponse;
@@ -151,9 +153,39 @@ class DonasiController extends Controller
      */
     public function destroy(Donasi $donasi): RedirectResponse
     {
+        $bukti = $donasi->buktiPath();
+
         $donasi->delete();
 
+        if ($bukti) {
+            Storage::delete($bukti);
+        }
+
         return to_route('admin.donasi.index')->with('status', 'Donasi berhasil dihapus.');
+    }
+
+    /**
+     * Tampilkan foto bukti transfer dari disk privat.
+     */
+    public function bukti(Donasi $donasi): StreamedResponse
+    {
+        $bukti = $donasi->buktiPath();
+
+        abort_unless($bukti && Storage::exists($bukti), 404);
+
+        return Storage::response($bukti);
+    }
+
+    /**
+     * Baca ulang bukti transfer dengan AI, mis. setelah pembacaan sebelumnya gagal.
+     */
+    public function bacaBukti(Donasi $donasi, PembacaBuktiTransfer $pembaca): RedirectResponse
+    {
+        abort_unless($donasi->buktiPath(), 404);
+
+        $pembaca->bacaDonasi($donasi);
+
+        return back()->with('status', 'Bukti transfer sudah dibaca ulang.');
     }
 
     /**

@@ -8,7 +8,10 @@ use App\Enums\StatusDonasi;
 use App\Enums\TampilanDonatur;
 use App\Models\Donasi;
 use App\Models\User;
+use App\Services\PembacaBuktiTransfer;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Storage;
+use Mockery\MockInterface;
 use Tests\TestCase;
 
 class DonasiTest extends TestCase
@@ -166,6 +169,59 @@ class DonasiTest extends TestCase
             ->assertRedirect(route('admin.donasi.index'));
 
         $this->assertModelMissing($donasi);
+    }
+
+    public function test_transfer_proof_and_ai_reading_are_shown_to_staff(): void
+    {
+        Storage::fake();
+        $donasi = Donasi::factory()->create(['nominal' => 50000]);
+        $donasi->forceFill([
+            'bukti_transfer' => 'bukti.jpg',
+            'bukti_hasil' => ['adalah_bukti_transfer' => true, 'nominal' => 5000, 'tanggal' => '2026-10-26', 'bank' => 'BRImo', 'nama_pengirim' => 'SITI RAHMA', 'nama_penerima' => 'YAYASAN SIRAJUL IBAD', 'catatan' => null],
+        ])->save();
+        Storage::put('bukti-transfer/bukti.jpg', 'isi foto');
+
+        $this->get(route('admin.donasi.bukti', $donasi))->assertNotFound();
+
+        $this->actingAs(User::factory()->create())
+            ->get(route('admin.donasi.index'))
+            ->assertSee('Bukti perlu dicek');
+
+        $this->get(route('admin.donasi.edit', $donasi))
+            ->assertSee(['Perlu dicek', 'Rp5.000', 'BRImo', 'SITI RAHMA']);
+
+        $this->get(route('admin.donasi.bukti', $donasi))->assertOk();
+    }
+
+    public function test_transfer_proof_can_be_read_again(): void
+    {
+        Storage::fake();
+        $donasi = Donasi::factory()->create(['nominal' => 50000]);
+        $donasi->forceFill(['bukti_transfer' => 'bukti.jpg', 'bukti_hasil' => ['galat' => 'Layanan AI sedang tidak dapat dihubungi.']])->save();
+        Storage::put('bukti-transfer/bukti.jpg', 'isi foto');
+        $this->partialMock(PembacaBuktiTransfer::class, function (MockInterface $mock) {
+            $mock->shouldReceive('baca')->once()->andReturn(['adalah_bukti_transfer' => true, 'nominal' => 50000, 'tanggal' => null, 'bank' => null, 'nama_pengirim' => null, 'nama_penerima' => null, 'catatan' => null]);
+        });
+
+        $this->actingAs(User::factory()->create())
+            ->from(route('admin.donasi.edit', $donasi))
+            ->post(route('admin.donasi.baca-bukti', $donasi))
+            ->assertRedirect(route('admin.donasi.edit', $donasi));
+
+        $this->assertTrue($donasi->refresh()->buktiCocok());
+    }
+
+    public function test_deleting_donasi_removes_its_transfer_proof(): void
+    {
+        Storage::fake();
+        $donasi = Donasi::factory()->create();
+        $donasi->forceFill(['bukti_transfer' => 'bukti.jpg'])->save();
+        Storage::put('bukti-transfer/bukti.jpg', 'isi foto');
+
+        $this->actingAs(User::factory()->admin()->create())
+            ->delete(route('admin.donasi.destroy', $donasi));
+
+        Storage::assertMissing('bukti-transfer/bukti.jpg');
     }
 
     /**

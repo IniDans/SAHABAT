@@ -123,6 +123,12 @@
                             <td class="px-4 py-3 whitespace-nowrap">{{ $item->metode_pembayaran->value }}</td>
                             <td class="px-4 py-3">
                                 <x-admin.badge :tone="$statusTone[$item->status->value]">{{ $item->status->value }}</x-admin.badge>
+                                @if ($item->bukti_transfer)
+                                    @php($cocok = $item->buktiCocok())
+                                    <a href="{{ route('admin.donasi.edit', $item) }}" class="mt-1 block text-[11px] hover:underline {{ $cocok === true ? 'text-footer' : ($cocok === false ? 'text-[#c0262f]' : 'text-slate') }}">
+                                        {{ $cocok === true ? 'Bukti cocok' : ($cocok === false ? 'Bukti perlu dicek' : 'Ada bukti') }}
+                                    </a>
+                                @endif
                             </td>
                             <td class="px-4 py-3">
                                 <div class="flex justify-end gap-1.5">

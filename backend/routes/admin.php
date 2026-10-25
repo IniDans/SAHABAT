@@ -100,6 +100,8 @@ Route::middleware(['auth', 'auth.session', 'aktif'])->group(function () {
 
         Route::get('donasi/ekspor', [DonasiController::class, 'ekspor'])->name('donasi.ekspor');
         Route::patch('donasi/{donasi}/status', [DonasiController::class, 'updateStatus'])->name('donasi.status');
+        Route::get('donasi/{donasi}/bukti', [DonasiController::class, 'bukti'])->name('donasi.bukti');
+        Route::post('donasi/{donasi}/baca-bukti', [DonasiController::class, 'bacaBukti'])->middleware('throttle:10,1')->name('donasi.baca-bukti');
         Route::resource('donasi', DonasiController::class)
             ->except('show')
             ->parameters(['donasi' => 'donasi'])

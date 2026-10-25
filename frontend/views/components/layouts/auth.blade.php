@@ -18,9 +18,9 @@
         @vite(['css/app.css', 'js/app.js'])
     </head>
     <body class="flex min-h-screen flex-col font-poppins">
-        <header class="flex h-20 shrink-0 items-center bg-white px-4 sm:px-6 lg:h-[170px] lg:px-[42px]">
+        <header class="flex h-16 shrink-0 items-center bg-white px-4 sm:px-6 lg:h-20 lg:px-[42px]">
             <a href="{{ route('beranda') }}" aria-label="Panti Asuhan YASIBU - Beranda">
-                <img src="{{ asset('images/logo-yasibu.png') }}" alt="Panti Asuhan YASIBU" width="267" height="96" class="h-[52px] w-auto lg:h-24">
+                <img src="{{ asset('images/logo-yasibu.png') }}" alt="Panti Asuhan YASIBU" width="267" height="96" class="h-10 w-auto lg:h-12">
             </a>
         </header>
 
@@ -32,7 +32,7 @@
 
             <div class="w-full max-w-[421px] rounded-xl bg-white px-6 pt-3 pb-9 shadow-2xl sm:px-9">
                 <img src="{{ asset('images/logo-yasibu.png') }}" alt="" width="100" height="36" class="mx-auto h-9 w-auto">
-                <h1 class="mt-2 text-[26px] leading-tight font-semibold text-[#1e2328]">{{ $heading }}</h1>
+                <h1 class="mt-2 text-[22px] leading-tight font-semibold text-[#1e2328]">{{ $heading }}</h1>
                 @if ($description)
                     <p class="mt-1 text-sm text-slate">{{ $description }}</p>
                 @endif

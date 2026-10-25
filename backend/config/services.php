@@ -28,6 +28,12 @@ return [
         'region' => env('AWS_DEFAULT_REGION', 'us-east-1'),
     ],
 
+    // Pembacaan foto bukti transfer donasi. Kunci kosong berarti bukti hanya disimpan tanpa dibaca.
+    'anthropic' => [
+        'key' => env('ANTHROPIC_API_KEY'),
+        'model' => env('ANTHROPIC_MODEL', 'claude-opus-5-5'),
+    ],
+
     // Rahasia untuk route cron (Vercel Cron). Kosong berarti route cron selalu 404.
     'cron' => [
         'secret' => env('CRON_SECRET'),

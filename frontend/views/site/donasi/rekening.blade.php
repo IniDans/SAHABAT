@@ -15,6 +15,15 @@
     @session('status')
         <div class="container-site pt-6">
             <p class="rounded border border-[#badbcc] bg-[#d1e7dd] px-4 py-3 font-open text-sm text-[#0f5132]" role="status">{{ $value }}</p>
+            @session('kunci')
+                <div class="mt-3 flex flex-col gap-3 rounded border border-[#e6e6e6] bg-white px-4 py-4 font-open text-sm text-ink sm:flex-row sm:items-center sm:justify-between">
+                    <p>
+                        Kunci validasi donasi Anda: <strong class="font-mono text-base tracking-wider text-ink-dark">{{ $value }}</strong><br>
+                        Simpan kunci ini. Setelah transfer, unggah foto bukti transfer agar donasi cepat dikonfirmasi.
+                    </p>
+                    <a href="{{ route('donasi.validasi', ['kunci' => $value]) }}" class="btn-primary h-10 shrink-0 text-sm">Unggah bukti transfer</a>
+                </div>
+            @endsession
         </div>
     @endsession
 
