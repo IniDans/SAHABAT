@@ -87,7 +87,7 @@ class BuktiTransferTest extends TestCase
     public function test_proof_is_kept_for_manual_check_when_ai_is_not_configured(): void
     {
         Storage::fake();
-        config(['services.anthropic.key' => null]);
+        config(['services.gemini.key' => null]);
         $donasi = Donasi::factory()->create();
 
         $this->post(route('donasi.validasi.bukti'), ['kunci' => $donasi->kunci, 'bukti' => UploadedFile::fake()->image('bukti.jpg')])
@@ -147,7 +147,7 @@ class BuktiTransferTest extends TestCase
     }
 
     /**
-     * Ganti pemanggilan Claude dengan hasil tetap; penyimpanan hasil tetap memakai kode asli.
+     * Ganti pemanggilan Gemini dengan hasil tetap; penyimpanan hasil tetap memakai kode asli.
      *
      * @param  array<string, mixed>  $hasil
      */

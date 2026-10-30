@@ -748,6 +748,89 @@ function initRepeater() {
     });
 }
 
+/**
+ * Dialog scan KK/akta: foto di atas 4 MB diperkecil dulu di browser agar lolos batas unggah,
+ * dan tombol kirim menunjukkan proses karena AI butuh beberapa detik untuk membaca.
+ */
+function initPindaiDokumen() {
+    const form = document.querySelector('[data-pindai-form]');
+    if (!form) {
+        return;
+    }
+
+    const input = form.querySelector('input[type="file"]');
+    const tombol = form.querySelector('[data-pindai-kirim]');
+    const teksAwal = tombol.textContent;
+    const batas = 4 * 1024 * 1024;
+
+    form.addEventListener('submit', async (event) => {
+        const berkas = input.files[0];
+        tombol.disabled = true;
+        tombol.textContent = tombol.dataset.teksProses;
+
+        if (!berkas || berkas.size <= batas || !berkas.type.startsWith('image/')) {
+            return;
+        }
+
+        event.preventDefault();
+        try {
+            const transfer = new DataTransfer();
+            transfer.items.add(await perkecilFoto(berkas, 2400));
+            input.files = transfer.files;
+        } catch {
+            // Biarkan server yang menolak berkas yang terlalu besar.
+        }
+        form.submit();
+    });
+
+    // Kembali ke halaman ini lewat tombol Back memakai cache halaman, jadi aktifkan lagi tombolnya.
+    window.addEventListener('pageshow', () => {
+        tombol.disabled = false;
+        tombol.textContent = teksAwal;
+    });
+}
+
+/**
+ * Perkecil foto sampai sisi terpanjangnya sisiMaks piksel, disimpan sebagai JPEG.
+ */
+async function perkecilFoto(berkas, sisiMaks) {
+    const gambar = await createImageBitmap(berkas);
+    const skala = Math.min(1, sisiMaks / Math.max(gambar.width, gambar.height));
+    const kanvas = document.createElement('canvas');
+    kanvas.width = Math.round(gambar.width * skala);
+    kanvas.height = Math.round(gambar.height * skala);
+    kanvas.getContext('2d').drawImage(gambar, 0, 0, kanvas.width, kanvas.height);
+
+    const blob = await new Promise((resolve) => kanvas.toBlob(resolve, 'image/jpeg', 0.85));
+    return new File([blob], berkas.name.replace(/\.\w+$/, '') + '.jpg', { type: 'image/jpeg' });
+}
+
+/**
+ * Tinjau hasil scan: isian anak yang tidak dicentang dinonaktifkan (tidak ikut terkirim),
+ * dan isian wali baru hanya tampil bila "Buat wali baru" dipilih.
+ */
+function initTinjauPindai() {
+    document.querySelectorAll('[data-pindai-pilih]').forEach((kotak) => {
+        const isian = document.getElementById(kotak.dataset.pindaiPilih);
+        const perbarui = () => {
+            isian.disabled = !kotak.checked;
+        };
+        kotak.addEventListener('change', perbarui);
+        perbarui();
+    });
+
+    const wali = document.querySelector('[data-pindai-wali]');
+    const waliBaru = document.querySelector('[data-pindai-wali-baru]');
+    if (wali && waliBaru) {
+        const perbarui = () => {
+            waliBaru.hidden = wali.value !== 'baru';
+            waliBaru.disabled = waliBaru.hidden;
+        };
+        wali.addEventListener('change', perbarui);
+        perbarui();
+    }
+}
+
 document.addEventListener('DOMContentLoaded', () => {
     initSliders();
     initNavigation();
@@ -765,6 +848,8 @@ document.addEventListener('DOMContentLoaded', () => {
     initAdminDialogs();
     initAnakForm();
     initEksporAnak();
+    initPindaiDokumen();
+    initTinjauPindai();
     initGrafikTren();
     initRepeater();
 });

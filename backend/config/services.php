@@ -28,10 +28,11 @@ return [
         'region' => env('AWS_DEFAULT_REGION', 'us-east-1'),
     ],
 
-    // Pembacaan foto bukti transfer donasi. Kunci kosong berarti bukti hanya disimpan tanpa dibaca.
-    'anthropic' => [
-        'key' => env('ANTHROPIC_API_KEY'),
-        'model' => env('ANTHROPIC_MODEL', 'claude-opus-5-5'),
+    // Pembacaan bukti transfer donasi dan scan KK/akta anak dengan Gemini.
+    // Kunci kosong berarti bukti transfer hanya disimpan tanpa dibaca dan scan KK/akta nonaktif.
+    'gemini' => [
+        'key' => env('GEMINI_API_KEY'),
+        'model' => env('GEMINI_MODEL', 'gemini-3.5-flash-lite'),
     ],
 
     // Rahasia untuk route cron (Vercel Cron). Kosong berarti route cron selalu 404.

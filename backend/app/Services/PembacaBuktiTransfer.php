@@ -2,18 +2,19 @@
 
 namespace App\Services;
 
-use Anthropic\Client;
-use Anthropic\Core\Exceptions\AnthropicException;
 use App\Models\Donasi;
+use App\Services\Concerns\MembacaDenganGemini;
 use Illuminate\Support\Facades\Storage;
 use RuntimeException;
 
 /**
- * Membaca foto bukti transfer donasi dengan Claude (gambar dikirim ke Anthropic).
+ * Membaca foto bukti transfer donasi dengan Gemini (gambar dikirim ke Google).
  * Hasilnya hanya bantuan pengecekan; keputusan terima/tolak tetap di admin.
  */
 class PembacaBuktiTransfer
 {
+    use MembacaDenganGemini;
+
     private const INSTRUKSI = <<<'TEKS'
         Kamu membantu pengurus panti asuhan mengecek bukti transfer donasi dari Indonesia
         (struk ATM, tangkapan layar m-banking, e-wallet, atau QRIS).
@@ -64,49 +65,6 @@ class PembacaBuktiTransfer
      */
     public function baca(string $gambar, string $mediaType): array
     {
-        $apiKey = config('services.anthropic.key');
-
-        if (blank($apiKey)) {
-            throw new RuntimeException('Pembacaan otomatis belum aktif.');
-        }
-
-        try {
-            $message = (new Client(apiKey: $apiKey, requestOptions: ['timeout' => 60, 'maxRetries' => 1]))->messages->create(
-                model: config('services.anthropic.model'),
-                maxTokens: 8000,
-                system: self::INSTRUKSI,
-                messages: [[
-                    'role' => 'user',
-                    'content' => [
-                        ['type' => 'image', 'source' => ['type' => 'base64', 'mediaType' => $mediaType, 'data' => base64_encode($gambar)]],
-                        ['type' => 'text', 'text' => 'Baca bukti transfer ini.'],
-                    ],
-                ]],
-                outputConfig: [
-                    'effort' => 'low',
-                    'format' => ['type' => 'json_schema', 'schema' => self::SKEMA],
-                ],
-            );
-        } catch (AnthropicException $e) {
-            report($e);
-
-            throw new RuntimeException('Layanan AI sedang tidak dapat dihubungi.', previous: $e);
-        }
-
-        if ($message->stopReason !== 'end_turn') {
-            throw new RuntimeException('AI tidak dapat membaca gambar ini.');
-        }
-
-        foreach ($message->content as $block) {
-            if ($block->type === 'text') {
-                $hasil = json_decode($block->text, true);
-
-                if (is_array($hasil)) {
-                    return $hasil;
-                }
-            }
-        }
-
-        throw new RuntimeException('Jawaban AI tidak dapat dibaca.');
+        return $this->bacaBerkas($gambar, $mediaType, self::INSTRUKSI, self::SKEMA, 'Baca bukti transfer ini.');
     }
 }

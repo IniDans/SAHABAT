@@ -14,6 +14,7 @@ use App\Http\Controllers\Admin\LoginController;
 use App\Http\Controllers\Admin\LupaPasswordController;
 use App\Http\Controllers\Admin\PengasuhController;
 use App\Http\Controllers\Admin\PesanController;
+use App\Http\Controllers\Admin\PindaiDokumenController;
 use App\Http\Controllers\Admin\ProfilPantiController;
 use App\Http\Controllers\Admin\ProgramController;
 use App\Http\Controllers\Admin\WaliAnakController;
@@ -81,6 +82,11 @@ Route::middleware(['auth', 'auth.session', 'aktif'])->group(function () {
             ->middlewareFor('destroy', 'can:admin');
 
         Route::get('anak-panti/ekspor', [AnakPantiController::class, 'ekspor'])->name('anak-panti.ekspor');
+        // Scan KK/akta harus terdaftar sebelum resource agar "pindai" tidak dianggap NIK.
+        Route::post('anak-panti/pindai', [PindaiDokumenController::class, 'baca'])->middleware('throttle:10,1')->name('anak-panti.pindai.baca');
+        Route::get('anak-panti/pindai', [PindaiDokumenController::class, 'tinjau'])->name('anak-panti.pindai');
+        Route::post('anak-panti/pindai/simpan', [PindaiDokumenController::class, 'simpan'])->name('anak-panti.pindai.simpan');
+        Route::delete('anak-panti/pindai', [PindaiDokumenController::class, 'batal'])->name('anak-panti.pindai.batal');
         Route::resource('anak-panti', AnakPantiController::class)
             ->only(['index', 'store', 'update', 'destroy'])
             ->middlewareFor('destroy', 'can:admin');

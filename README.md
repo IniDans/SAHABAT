@@ -50,7 +50,7 @@ Gambar statis tetap di `backend/public/images` karena folder `public` adalah roo
 | Menu | Isi |
 | --- | --- |
 | Dashboard | Ringkasan data panti |
-| Anak panti | Data anak, bisa diekspor |
+| Anak panti | Data anak, bisa diekspor. Tombol **Scan KK / Akta** membaca foto Kartu Keluarga atau akta kelahiran dengan AI, lalu data anak diperiksa di form tinjauan sebelum disimpan |
 | Kesehatan anak | Catatan timbang dan analisis status gizi (dihitung dengan rumus, tanpa AI) |
 | Pengasuh, Wali anak | Data pengasuh dan wali |
 | Kegiatan panti | Kegiatan beserta fotonya |
@@ -160,7 +160,10 @@ APP_DEBUG=false
 APP_URL=https://domain-panti.org
 SESSION_SECURE_COOKIE=true
 MAIL_MAILER=smtp        # supaya email lupa password benar-benar terkirim
+GEMINI_API_KEY=...      # untuk membaca bukti transfer dan scan KK/akta; tanpa ini kedua fitur itu nonaktif
 ```
+
+Scan KK/akta dan bukti transfer dibaca oleh Gemini (Google): berkasnya dikirim ke Google. Pakai API key dari project Google Cloud yang billing-nya aktif untuk data asli, karena di tingkat gratis Google boleh memakai data yang dikirim untuk mengembangkan produknya. Foto KK/akta tidak disimpan di server; hasil bacanya hanya mengisi form, dan data tersimpan setelah pengurus menekan Simpan.
 
 Folder `frontend` harus ikut di-upload ke server, sejajar dengan folder `backend`, karena tampilan Blade dibaca dari sana. Dari folder `backend`, jalankan:
 
