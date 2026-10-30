@@ -44,12 +44,12 @@
         @vite(['css/app.css', 'js/app.js'])
     </head>
     <body class="flex min-h-screen flex-col bg-[#f3f4f2] font-poppins text-[#1e2328]">
-        <header class="flex h-20 shrink-0 items-center gap-3 bg-white px-4 sm:px-6 lg:h-[170px] lg:px-[42px]">
+        <header class="flex h-16 shrink-0 items-center gap-3 bg-white px-4 sm:px-6 lg:h-20 lg:px-[42px]">
             <button type="button" class="flex size-10 items-center justify-center rounded-lg text-slate hover:bg-surface lg:hidden" aria-label="Buka menu admin" aria-controls="admin-sidebar" aria-expanded="false" data-sidebar-toggle>
                 <x-admin.icon name="menu" width="24" height="24" />
             </button>
             <a href="{{ route('beranda') }}" aria-label="Panti Asuhan YASIBU - Beranda">
-                <img src="{{ asset('images/logo-yasibu.png') }}" alt="Panti Asuhan YASIBU" width="267" height="96" class="h-[52px] w-auto lg:h-24">
+                <img src="{{ asset('images/logo-yasibu.png') }}" alt="Panti Asuhan YASIBU" width="267" height="96" class="h-10 w-auto lg:h-12">
             </a>
         </header>
 

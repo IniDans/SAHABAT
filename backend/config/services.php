@@ -28,6 +28,13 @@ return [
         'region' => env('AWS_DEFAULT_REGION', 'us-east-1'),
     ],
 
+    // Pembacaan bukti transfer donasi dan scan KK/akta anak dengan Gemini.
+    // Kunci kosong berarti bukti transfer hanya disimpan tanpa dibaca dan scan KK/akta nonaktif.
+    'gemini' => [
+        'key' => env('GEMINI_API_KEY'),
+        'model' => env('GEMINI_MODEL', 'gemini-3.5-flash-lite'),
+    ],
+
     // Rahasia untuk route cron (Vercel Cron). Kosong berarti route cron selalu 404.
     'cron' => [
         'secret' => env('CRON_SECRET'),

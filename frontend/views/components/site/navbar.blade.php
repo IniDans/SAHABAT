@@ -30,32 +30,32 @@
 @endphp
 
 <header class="relative z-40 bg-white shadow-nav">
-    <div class="flex h-20 items-center justify-between px-4 sm:px-6 lg:h-[170px] lg:px-[42px]">
+    <div class="flex h-16 items-center justify-between px-4 sm:px-6 lg:h-20 lg:px-[42px]">
         <a href="{{ route('beranda') }}" class="shrink-0" aria-label="Panti Asuhan YASIBU - Beranda">
-            <img src="{{ asset('images/logo-yasibu.png') }}" alt="Panti Asuhan YASIBU" width="267" height="96" class="h-[52px] w-auto lg:h-24">
+            <img src="{{ asset('images/logo-yasibu.png') }}" alt="Panti Asuhan YASIBU" width="267" height="96" class="h-10 w-auto lg:h-12">
         </a>
 
         <nav class="hidden lg:block" aria-label="Navigasi utama">
-            <ul class="flex items-center gap-7 xl:gap-[42px]">
+            <ul class="flex items-center gap-6 xl:gap-8">
                 @foreach ($menu as $item)
                     @php($isActive = request()->routeIs($item['active']))
                     @isset($item['children'])
                         <li class="group relative" data-dropdown>
-                            <button type="button" class="flex items-center gap-1 py-6 font-poppins text-lg font-medium xl:text-xl {{ $isActive ? 'text-brand-red' : 'text-slate' }} transition hover:text-brand-red" aria-haspopup="true" aria-expanded="false" data-dropdown-toggle>
+                            <button type="button" class="flex items-center gap-1 py-6 font-poppins text-[15px] font-medium {{ $isActive ? 'text-brand-red' : 'text-slate' }} transition hover:text-brand-red" aria-haspopup="true" aria-expanded="false" data-dropdown-toggle>
                                 {{ $item['label'] }}
-                                <img src="{{ asset('images/icons/chevron-down.svg') }}" alt="" width="20" height="20" class="rotate-180 transition group-hover:rotate-0">
+                                <img src="{{ asset('images/icons/chevron-down.svg') }}" alt="" width="16" height="16" class="rotate-180 transition group-hover:rotate-0">
                             </button>
-                            <ul class="invisible absolute top-full left-0 min-w-56 translate-y-2 rounded-b border-t-2 border-brand-red bg-white py-2 opacity-0 shadow-card transition group-hover:visible group-hover:translate-y-0 group-hover:opacity-100 group-focus-within:visible group-focus-within:translate-y-0 group-focus-within:opacity-100">
+                            <ul class="invisible absolute top-full {{ $loop->last ? 'right-0' : 'left-0' }} min-w-56 translate-y-2 rounded-b border-t-2 border-brand-red bg-white py-2 opacity-0 shadow-card transition group-hover:visible group-hover:translate-y-0 group-hover:opacity-100 group-focus-within:visible group-focus-within:translate-y-0 group-focus-within:opacity-100">
                                 @foreach ($item['children'] as $child)
                                     <li>
-                                        <a href="{{ $childUrl($child) }}" class="block px-5 py-2.5 font-poppins text-base {{ $isChildActive($child) ? 'text-brand-red' : 'text-slate' }} hover:bg-surface hover:text-brand-red">{{ $child['label'] }}</a>
+                                        <a href="{{ $childUrl($child) }}" class="block px-5 py-2 font-poppins text-sm {{ $isChildActive($child) ? 'text-brand-red' : 'text-slate' }} hover:bg-surface hover:text-brand-red">{{ $child['label'] }}</a>
                                     </li>
                                 @endforeach
                             </ul>
                         </li>
                     @else
                         <li>
-                            <a href="{{ route($item['route']) }}" class="font-poppins text-lg font-medium xl:text-xl {{ $isActive ? 'text-brand-red' : 'text-slate' }} transition hover:text-brand-red" @if ($isActive) aria-current="page" @endif>{{ $item['label'] }}</a>
+                            <a href="{{ route($item['route']) }}" class="font-poppins text-[15px] font-medium {{ $isActive ? 'text-brand-red' : 'text-slate' }} transition hover:text-brand-red" @if ($isActive) aria-current="page" @endif>{{ $item['label'] }}</a>
                         </li>
                     @endisset
                 @endforeach

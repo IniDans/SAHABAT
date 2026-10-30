@@ -15,8 +15,10 @@ use App\Models\KebutuhanPanti;
 use App\Models\Pesan;
 use App\Models\ProfilPanti;
 use App\Models\Program;
+use App\Services\PembacaBuktiTransfer;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
 
 /**
@@ -119,7 +121,60 @@ class SiteController extends Controller
             $donasi->program->value,
             Donasi::rupiah($donasi->nominal),
             $donasi->metode_pembayaran->value,
-        ));
+        ))->with('kunci', $donasi->kunci);
+    }
+
+    /**
+     * Cek donasi dengan kunci validasi; donasi yang masih menunggu bisa diberi bukti transfer.
+     */
+    public function validasiDonasi(Request $request): View
+    {
+        $kunci = $request->string('kunci')->trim()->value();
+
+        return view('site.donasi.validasi', [
+            'kunci' => $kunci,
+            'donasi' => $kunci !== '' ? Donasi::dariKunci($kunci) : null,
+        ]);
+    }
+
+    /**
+     * Simpan foto bukti transfer ke disk privat lalu baca isinya dengan AI.
+     */
+    public function unggahBukti(Request $request, PembacaBuktiTransfer $pembaca): RedirectResponse
+    {
+        $validated = $request->validate([
+            'kunci' => ['required', 'string', 'max:20'],
+            'bukti' => ['required', 'image', 'mimes:jpg,jpeg,png,webp', 'max:4096'],
+        ], [
+            'bukti.required' => 'Pilih foto bukti transfer.',
+            'bukti.image' => 'Bukti transfer harus berupa foto.',
+            'bukti.mimes' => 'Foto harus berformat JPG, PNG, atau WEBP.',
+            'bukti.max' => 'Ukuran foto maksimal 4 MB.',
+        ]);
+
+        $donasi = Donasi::dariKunci($validated['kunci']);
+
+        abort_unless($donasi, 404);
+
+        if ($donasi->status !== StatusDonasi::Menunggu) {
+            return to_route('donasi.validasi', ['kunci' => $donasi->kunci])
+                ->withErrors(['bukti' => 'Donasi ini sudah diproses pengurus, bukti tidak bisa diganti.']);
+        }
+
+        $lama = $donasi->buktiPath();
+        $donasi->forceFill([
+            'bukti_transfer' => basename($request->file('bukti')->store(Donasi::BUKTI_FOLDER)),
+            'bukti_hasil' => null,
+        ])->save();
+
+        if ($lama) {
+            Storage::delete($lama);
+        }
+
+        $pembaca->bacaDonasi($donasi);
+
+        return to_route('donasi.validasi', ['kunci' => $donasi->kunci])
+            ->with('status', 'Bukti transfer terkirim. Pengurus akan mengonfirmasi donasi Anda.');
     }
 
     public function anakAsuh(Request $request): View
@@ -129,7 +184,7 @@ class SiteController extends Controller
         $children = AnakPanti::aktif()
             ->when($request->filled('q'), fn ($query) => $query->where('Nama', 'like', '%'.$request->string('q')->trim().'%'))
             ->orderBy('Nama', $isDescending ? 'desc' : 'asc')
-            ->paginate(25, ['Nama', 'Jenis_Kelamin', 'Pendidikan'])
+            ->paginate(25, ['Nama', 'Jenis_Kelamin', 'Tanggal_Lahir'])
             ->withQueryString();
 
         return view('site.tentang.anak-asuh', [

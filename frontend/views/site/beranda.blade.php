@@ -24,25 +24,25 @@
         <img src="{{ asset('images/hero-1.png') }}" alt="" class="absolute inset-0 -z-20 size-full object-cover">
         <div class="absolute inset-0 -z-10 bg-[rgba(30,35,40,0.6)]"></div>
 
-        <div class="grid min-h-[640px] md:min-h-[760px] xl:min-h-[946px]">
+        <div class="grid min-h-[480px] md:min-h-[560px] xl:min-h-[620px]">
             @foreach ($slides as $slide)
                 <div @class([
-                    'col-start-1 row-start-1 flex flex-col items-center px-4 pt-16 pb-12 text-center text-white transition-opacity duration-700 md:pt-24 xl:pt-[132px]',
+                    'col-start-1 row-start-1 flex flex-col items-center justify-center px-4 pt-12 pb-20 text-center text-white transition-opacity duration-700',
                     'opacity-100' => $loop->first,
                     'pointer-events-none opacity-0' => ! $loop->first,
                 ]) role="group" aria-roledescription="slide" aria-label="{{ $loop->iteration }} dari {{ count($slides) }}" @unless ($loop->first) aria-hidden="true" @endunless data-slide>
-                    <h1 class="font-raleway text-3xl leading-tight font-bold md:text-5xl md:leading-[57.6px]">{{ $slide['title'] }}</h1>
+                    <h1 class="font-raleway text-2xl leading-tight font-bold md:text-4xl">{{ $slide['title'] }}</h1>
 
-                    <div class="mt-6 flex min-h-[260px] w-full max-w-[780px] items-center justify-center rounded-[10px] bg-white/27 px-6 py-10 shadow-hero backdrop-blur-[2px] md:mt-3 md:min-h-[360px] xl:min-h-[447px] xl:px-[60px]">
-                        <p class="max-w-[680px] font-open text-base leading-6 md:text-xl md:leading-6">{{ $slide['text'] }}</p>
+                    <div class="mt-6 flex w-full max-w-[720px] items-center justify-center rounded-[10px] bg-white/27 px-6 py-8 shadow-hero backdrop-blur-[2px] md:py-10 xl:px-[60px]">
+                        <p class="max-w-[620px] font-open text-base leading-relaxed md:text-lg">{{ $slide['text'] }}</p>
                     </div>
 
-                    <p class="mt-[88px] font-raleway text-2xl font-medium md:text-[32px] md:leading-tight">{{ $slide['caption'] }}</p>
+                    <p class="mt-8 font-raleway text-lg font-medium md:text-2xl">{{ $slide['caption'] }}</p>
                 </div>
             @endforeach
         </div>
 
-        <div class="absolute inset-x-0 bottom-[120px] flex justify-center gap-1.5 md:bottom-[150px] xl:bottom-[224px]">
+        <div class="absolute inset-x-0 bottom-8 flex justify-center gap-1.5">
             @foreach ($slides as $slide)
                 <button type="button" @class(['h-3 w-5 rounded-full transition', 'bg-brand-red' => $loop->first, 'bg-white/60' => ! $loop->first]) aria-label="Tampilkan slide {{ $loop->iteration }}" @if ($loop->first) aria-current="true" @endif data-slider-dot></button>
             @endforeach

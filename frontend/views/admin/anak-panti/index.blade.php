@@ -31,6 +31,8 @@
     $nikLama = old('_nik_lama');
     $galatLain = collect(['hapus', 'format', 'cakupan', 'kolom', 'kolom.*', 'nik'])->flatMap(fn (string $kunci) => $errors->get($kunci))->flatten();
 
+    $nikBaru = session('anak_baru', []);
+
     $status = $filter['status'] ?? null;
     $kesehatan = $filter['kesehatan'] ?? null;
     $kartu = [
@@ -46,6 +48,10 @@
         <button type="button" class="admin-btn admin-btn-secondary" data-dialog-buka="dialog-ekspor">
             <x-admin.icon name="download" width="16" height="16" />
             Export data
+        </button>
+        <button type="button" class="admin-btn admin-btn-secondary" data-dialog-buka="dialog-pindai">
+            <x-admin.icon name="scan" width="16" height="16" />
+            Scan KK / Akta
         </button>
         <button type="button" class="admin-btn admin-btn-primary" data-anak-buka data-url="{{ route('admin.anak-panti.store') }}" data-anak='@json($dataBaru)'>
             <x-admin.icon name="plus" width="16" height="16" />
@@ -123,7 +129,12 @@
                                 <input type="checkbox" form="form-ekspor" name="nik[]" value="{{ $item->NIK }}" class="size-4 align-middle accent-footer" aria-label="Pilih {{ $item->Nama }}" data-anak-pilih>
                             </td>
                             <td class="px-4 py-3">
-                                <p class="font-semibold">{{ $item->Nama }}</p>
+                                <p class="font-semibold">
+                                    {{ $item->Nama }}
+                                    @if (in_array($item->NIK, $nikBaru, true))
+                                        <x-admin.badge tone="green" class="ml-1">Baru</x-admin.badge>
+                                    @endif
+                                </p>
                                 <p class="text-xs text-slate tabular-nums">{{ $item->NIK }}</p>
                             </td>
                             <td class="px-4 py-3 whitespace-nowrap">{{ $labelJenisKelamin[$item->Jenis_Kelamin->value] }}</td>
@@ -200,23 +211,7 @@
                         $galat = $errors->has($nama);
                     @endphp
                     <x-admin.field :label="$konfigurasi['label']" :name="$nama" :required="$konfigurasi['wajib']">
-                        @if ($konfigurasi['jenis'] === 'select')
-                            <select id="{{ $nama }}" name="{{ $nama }}" class="admin-input pr-8" @required($konfigurasi['wajib']) @if ($galat) aria-invalid="true" aria-describedby="{{ $nama }}-error" @endif>
-                                <option value="">{{ $konfigurasi['kosong'] ?? 'Pilih '.strtolower($konfigurasi['label']) }}</option>
-                                @foreach ($konfigurasi['pilihan'] as $nilaiOpsi => $teks)
-                                    <option value="{{ $nilaiOpsi }}" @selected($nilai === (string) $nilaiOpsi)>{{ $teks }}</option>
-                                @endforeach
-                            </select>
-                        @else
-                            <input id="{{ $nama }}" type="{{ $konfigurasi['jenis'] === 'date' ? 'date' : 'text' }}" name="{{ $nama }}" value="{{ $nilai }}" class="admin-input" @required($konfigurasi['wajib']) @if ($konfigurasi['jenis'] === 'datalist') list="pilihan-{{ $nama }}" @endif @if ($galat) aria-invalid="true" aria-describedby="{{ $nama }}-error" @endif {!! $konfigurasi['atribut'] ?? '' !!}>
-                            @if ($konfigurasi['jenis'] === 'datalist')
-                                <datalist id="pilihan-{{ $nama }}">
-                                    @foreach ($konfigurasi['pilihan'] as $teks)
-                                        <option value="{{ $teks }}"></option>
-                                    @endforeach
-                                </datalist>
-                            @endif
-                        @endif
+                        <x-admin.anak-input :id="$nama" :name="$nama" :konfigurasi="$konfigurasi" :nilai="$nilai" :galat="$galat" />
                     </x-admin.field>
                 @endforeach
             </div>
@@ -224,6 +219,35 @@
             <div class="flex justify-end gap-3 border-t border-[#eceeec] px-6 py-4 sm:px-8">
                 <button type="button" class="admin-btn admin-btn-secondary min-w-24" data-dialog-tutup>Batal</button>
                 <button type="submit" class="admin-btn admin-btn-primary min-w-28">Simpan</button>
+            </div>
+        </form>
+    </dialog>
+
+    {{-- Dialog scan KK/akta. Terbuka lagi otomatis bila dokumen gagal dibaca. --}}
+    <dialog id="dialog-pindai" aria-labelledby="dialog-pindai-judul" class="m-auto max-h-[calc(100dvh-2rem)] w-[calc(100%-2rem)] max-w-[560px] overflow-hidden rounded-2xl bg-white p-0 text-[#1e2328] shadow-xl backdrop:bg-[#1e2328]/45 open:flex" @error('dokumen') data-buka @enderror>
+        <form action="{{ route('admin.anak-panti.pindai.baca') }}" method="POST" enctype="multipart/form-data" class="flex max-h-full w-full flex-col" data-pindai-form>
+            @csrf
+
+            <div class="flex items-start justify-between gap-4 border-b border-[#eceeec] px-6 py-5 sm:px-8">
+                <div>
+                    <h2 id="dialog-pindai-judul" class="text-lg font-semibold">Scan KK atau akta kelahiran</h2>
+                    <p class="mt-0.5 text-[13px] text-slate">AI membaca data anak dari dokumen. Anda bisa memeriksa dan mengubah hasilnya sebelum disimpan.</p>
+                </div>
+                <button type="button" class="admin-icon-btn" aria-label="Tutup" data-dialog-tutup>
+                    <x-admin.icon name="x" width="16" height="16" />
+                </button>
+            </div>
+
+            <div class="space-y-4 overflow-y-auto px-6 py-5 sm:px-8">
+                <x-admin.field label="Foto atau PDF dokumen" name="dokumen" required hint="JPG, PNG, WEBP, atau PDF, maksimal 4 MB. Foto seluruh halaman dengan cahaya cukup agar tulisan terbaca.">
+                    <input id="dokumen" type="file" name="dokumen" accept="image/jpeg,image/png,image/webp,application/pdf" class="admin-input" required @error('dokumen') aria-invalid="true" aria-describedby="dokumen-error" @enderror>
+                </x-admin.field>
+                <p class="rounded-lg bg-[#f5f7f6] px-4 py-3 text-xs text-slate">Dokumen dikirim ke layanan AI (Google Gemini) untuk dibaca dan tidak disimpan di server panti.</p>
+            </div>
+
+            <div class="flex justify-end gap-3 border-t border-[#eceeec] px-6 py-4 sm:px-8">
+                <button type="button" class="admin-btn admin-btn-secondary min-w-24" data-dialog-tutup>Batal</button>
+                <button type="submit" class="admin-btn admin-btn-primary min-w-32" data-pindai-kirim data-teks-proses="Membaca dokumen…">Baca dokumen</button>
             </div>
         </form>
     </dialog>

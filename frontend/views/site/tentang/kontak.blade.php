@@ -3,7 +3,7 @@
 
     <section class="mx-auto grid w-full max-w-[1440px] gap-10 px-4 py-10 font-open text-ink lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] lg:gap-[70px] lg:px-[20px] lg:pt-4 lg:pb-[60px] xl:px-[20px]">
         <div>
-            <h2 class="font-raleway text-2xl font-bold text-ink-dark">Lokasi</h2>
+            <h2 class="font-raleway text-xl font-bold text-ink-dark">Lokasi</h2>
             @if ($profil['peta'])
                 <div class="mt-3 aspect-[4/3] w-full overflow-hidden bg-surface lg:max-w-[460px]">
                     <iframe
@@ -26,7 +26,7 @@
         </div>
 
         <div>
-            <h2 class="font-raleway text-2xl font-bold text-ink-dark">Kontak</h2>
+            <h2 class="font-raleway text-xl font-bold text-ink-dark">Kontak</h2>
 
             <dl class="mt-4 space-y-5">
                 <div class="flex gap-3">
@@ -34,7 +34,7 @@
                         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2" /><path d="m3 7 9 6 9-6" /></svg>
                     </dt>
                     <dd>
-                        <p class="font-raleway text-2xl text-ink-dark">Email</p>
+                        <p class="font-raleway text-lg text-ink-dark">Email</p>
                         <a href="mailto:{{ $profil['email'] }}" class="text-sm text-slate-light hover:text-brand-red">{{ $profil['email'] }}</a>
                     </dd>
                 </div>
@@ -43,7 +43,7 @@
                         <x-site.whatsapp-icon class="size-6" />
                     </dt>
                     <dd>
-                        <p class="font-raleway text-2xl text-ink-dark">WhatsApp</p>
+                        <p class="font-raleway text-lg text-ink-dark">WhatsApp</p>
                         <ul class="text-sm">
                             @foreach ($profil['whatsapp'] as $contact)
                                 <li>
