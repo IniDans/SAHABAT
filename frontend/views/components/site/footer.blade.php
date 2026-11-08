@@ -23,8 +23,8 @@
 @endphp
 
 <footer class="bg-footer text-white">
-    <div class="container-site grid gap-10 py-12 sm:grid-cols-2 lg:grid-cols-[1.4fr_0.8fr_0.8fr_1fr] lg:gap-8 lg:py-[50px]">
-        <div class="flex flex-col items-start lg:items-center">
+    <div class="container-site grid gap-10 py-12 sm:grid-cols-2 lg:gap-8 lg:py-[50px] {{ $socials ? 'lg:grid-cols-[1.4fr_0.8fr_0.8fr_1fr]' : 'lg:grid-cols-[1.4fr_1fr_1fr]' }}">
+        <div class="flex flex-col items-start">
             <img src="{{ asset('images/logo-yasibu-footer.png') }}" alt="Panti Asuhan YASIBU" width="127" height="120" class="h-[120px] w-auto">
             <address class="mt-4 font-raleway text-sm leading-6 text-white not-italic">{!! nl2br(e($profil['kontak']['alamat_footer'])) !!}</address>
         </div>

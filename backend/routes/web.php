@@ -18,7 +18,8 @@ Route::get('/', [SiteController::class, 'home'])->name('beranda');
 Route::prefix('donasi')->name('donasi.')->group(function () {
     Route::get('formulir', [SiteController::class, 'formulirDonasi'])->name('formulir');
     Route::post('formulir', [SiteController::class, 'kirimDonasi'])->middleware('throttle:5,1')->name('formulir.store');
-    Route::view('validasi', 'site.donasi.validasi')->name('validasi');
+    Route::get('validasi', [SiteController::class, 'validasiDonasi'])->name('validasi');
+    Route::post('validasi', [SiteController::class, 'unggahBukti'])->middleware('throttle:5,1')->name('validasi.bukti');
     Route::view('cara-qris', 'site.donasi.cara-qris')->name('qris');
     Route::view('rekening', 'site.donasi.rekening')->name('rekening');
 });

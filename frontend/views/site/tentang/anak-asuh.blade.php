@@ -22,8 +22,8 @@
                                 <span class="sr-only">(urutkan {{ $isDescending ? 'A-Z' : 'Z-A' }})</span>
                             </a>
                         </th>
+                        <th scope="col" class="border-b border-[#e5e5e5] px-3 py-4 font-normal">Usia</th>
                         <th scope="col" class="border-b border-[#e5e5e5] px-3 py-4 font-normal">Jenis Kelamin</th>
-                        <th scope="col" class="border-b border-[#e5e5e5] px-3 py-4 font-normal">Pendidikan</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -31,8 +31,8 @@
                         <tr class="odd:[&>td]:bg-[#f1f1f1]">
                             <td class="px-3 py-3.5 text-center">{{ $children->firstItem() + $loop->index }}</td>
                             <td class="px-3 py-3.5 uppercase">{{ $child->Nama }}</td>
+                            <td class="px-3 py-3.5">{{ $child->umur() !== null ? $child->umur().' tahun' : '-' }}</td>
                             <td class="px-3 py-3.5">{{ $child->Jenis_Kelamin->value }}</td>
-                            <td class="px-3 py-3.5">{{ $child->Pendidikan }}</td>
                         </tr>
                     @empty
                         <tr>

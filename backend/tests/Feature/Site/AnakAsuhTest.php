@@ -22,6 +22,21 @@ class AnakAsuhTest extends TestCase
             ->assertSee('Menampilkan 26 sampai 26 dari 26 data');
     }
 
+    public function test_children_list_shows_name_age_and_gender_only(): void
+    {
+        AnakPanti::factory()->create([
+            'Nama' => 'ADITYA RAMADHAN',
+            'Jenis_Kelamin' => 'Laki-Laki',
+            'Tanggal_Lahir' => now()->subYears(12)->subDay(),
+            'Pendidikan' => 'SMP Negeri 7',
+        ]);
+
+        $this->get(route('tentang.anak-asuh'))
+            ->assertSeeInOrder(['Nama', 'Usia', 'Jenis Kelamin'])
+            ->assertSeeInOrder(['ADITYA RAMADHAN', '12 tahun', 'Laki-Laki'])
+            ->assertDontSee('SMP Negeri 7');
+    }
+
     public function test_children_can_be_searched_and_sorted(): void
     {
         AnakPanti::factory()->create(['Nama' => 'ADITYA RAMADHAN']);

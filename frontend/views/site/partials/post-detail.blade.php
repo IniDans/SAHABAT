@@ -16,7 +16,7 @@
             <img src="{{ $post->gambarUrl() }}" alt="{{ $post->judul }}" class="aspect-video w-full object-cover">
         @endif
 
-        <h1 @class(['font-raleway text-2xl leading-tight font-bold text-ink md:text-[32px] md:leading-[38px]', 'mt-5' => $post->gambarUrl()])>{{ $post->judul }}</h1>
+        <h1 @class(['font-raleway text-xl leading-tight font-bold text-ink md:text-[26px]', 'mt-5' => $post->gambarUrl()])>{{ $post->judul }}</h1>
 
         <p class="mt-3 flex items-center gap-2 font-open text-base text-muted">
             <img src="{{ asset('images/icons/calendar.svg') }}" alt="" width="14" height="14" class="size-4">
@@ -36,7 +36,7 @@
 
     <aside class="h-fit bg-white p-[30px] shadow-card" aria-label="Sidebar">
         <section>
-            <h2 class="font-raleway text-xl font-bold text-slate">Search</h2>
+            <h2 class="font-raleway text-lg font-bold text-slate">Search</h2>
             <form action="{{ route($indexRoute) }}" method="GET" class="mt-4 flex" role="search">
                 <label for="sidebar-search" class="sr-only">Cari</label>
                 <input id="sidebar-search" type="search" name="q" class="h-10 min-w-0 flex-1 rounded-l border border-slate px-3 font-open text-sm focus:ring-2 focus:ring-slate/30 focus:outline-none">
@@ -48,7 +48,7 @@
 
         @if ($categories)
             <section class="mt-8">
-                <h2 class="font-raleway text-xl font-bold text-slate">Categories</h2>
+                <h2 class="font-raleway text-lg font-bold text-slate">Categories</h2>
                 <ul class="mt-3">
                     @foreach ($categories as $name => $count)
                         <li>
@@ -63,7 +63,7 @@
 
         @if ($recentPosts->isNotEmpty())
             <section class="mt-8">
-                <h2 class="font-raleway text-xl font-bold text-slate">Artikel Kegiatan</h2>
+                <h2 class="font-raleway text-lg font-bold text-slate">Artikel Kegiatan</h2>
                 <ul class="mt-4 space-y-5">
                     @foreach ($recentPosts as $recent)
                         @php($recentKartu = $recent->kartu())
@@ -82,7 +82,7 @@
         @endif
 
         <section class="mt-8" data-donor-table data-per-halaman="5">
-            <h2 class="font-raleway text-xl font-bold text-slate">Daftar Donatur</h2>
+            <h2 class="font-raleway text-lg font-bold text-slate">Daftar Donatur</h2>
 
             <div class="mt-4 flex items-center gap-2">
                 <label for="donor-search" class="font-open text-sm text-ink">Cari:</label>

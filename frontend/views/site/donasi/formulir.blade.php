@@ -10,7 +10,7 @@
 <x-layouts.app title="Formulir Donasi">
     <x-site.page-header title="Formulir Donasi" :breadcrumbs="['Formulir Donasi' => null]" />
 
-    <section class="mx-auto w-full max-w-[1726px] px-4 py-8 lg:px-[77px] lg:pt-5 lg:pb-[60px]">
+    <section class="container-site py-8 lg:pb-[60px]">
         @if ($kebutuhan->isNotEmpty())
             <section class="mb-10 rounded border border-[#e6e6e6] bg-white p-5 shadow-sm" aria-labelledby="kebutuhan-panti">
                 <h2 id="kebutuhan-panti" class="font-raleway text-xl font-bold text-ink-dark">Kebutuhan Panti Saat Ini</h2>
@@ -36,7 +36,7 @@
             </section>
         @endif
 
-        <form action="{{ route('donasi.formulir.store') }}" method="POST" class="space-y-6">
+        <form action="{{ route('donasi.formulir.store') }}" method="POST" class="mx-auto max-w-3xl space-y-6 rounded border border-[#e6e6e6] bg-white p-5 shadow-sm sm:p-8">
             @csrf
 
             <div>
@@ -130,7 +130,7 @@
             </div>
 
             <div class="flex justify-center pt-4">
-                <button type="submit" class="btn-primary w-full max-w-[597px]">Selanjutnya</button>
+                <button type="submit" class="btn-primary w-full sm:w-auto sm:min-w-64">Selanjutnya</button>
             </div>
         </form>
     </section>

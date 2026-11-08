@@ -12,7 +12,7 @@
         </div>
 
         <div>
-            <h2 class="font-raleway text-2xl leading-tight font-bold text-ink-dark uppercase">Profil Lembaga</h2>
+            <h2 class="font-raleway text-xl leading-tight font-bold text-ink-dark uppercase">Profil Lembaga</h2>
             <div class="mt-5 space-y-4">
                 {{-- Paragraf dipisah baris kosong; isi di-escape dulu sebelum baris baru diubah ke <br>. --}}
                 @foreach (preg_split('/\R\s*\R/', trim($profil['sejarah'])) as $paragraf)
