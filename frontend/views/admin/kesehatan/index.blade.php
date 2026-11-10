@@ -15,6 +15,10 @@
 
 <x-layouts.admin title="Kesehatan Anak">
     <x-admin.page-heading title="Kesehatan anak" description="Skrining gizi dari berat badan bulanan, dibandingkan dengan standar berat menurut usia dan jenis kelamin.">
+        <a href="{{ route('admin.kesehatan.laporan', ['bulan' => $bulan->format('Y-m')]) }}" class="admin-btn admin-btn-secondary">
+            <x-admin.icon name="download" width="16" height="16" />
+            Laporan bulanan (PDF)
+        </a>
         <a href="{{ route('admin.kesehatan.timbang', ['bulan' => $bulan->format('Y-m')]) }}" class="admin-btn admin-btn-primary">
             <x-admin.icon name="plus" width="16" height="16" />
             Input berat badan

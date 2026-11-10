@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\ProfilPantiRequest;
+use App\Models\LogAktivitas;
 use App\Models\ProfilPanti;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -29,6 +30,8 @@ class ProfilPantiController extends Controller
     public function update(ProfilPantiRequest $request, string $bagian): RedirectResponse
     {
         ProfilPanti::simpan($bagian, $request->nilai());
+
+        LogAktivitas::catat(LogAktivitas::AKSI_UBAH, label: ProfilPanti::BAGIAN[$bagian], jenis: 'ProfilPanti');
 
         return to_route('admin.profil.edit', ['bagian' => $bagian])
             ->with('status', ProfilPanti::BAGIAN[$bagian].' berhasil disimpan dan sudah tampil di website.');

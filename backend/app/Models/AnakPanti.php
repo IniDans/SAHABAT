@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Enums\JenisKelamin;
 use App\Enums\StatusAsuh;
 use App\Enums\StatusGizi;
+use App\Models\Concerns\TercatatDiLog;
 use Carbon\CarbonImmutable;
 use Carbon\CarbonInterface;
 use Database\Factories\AnakPantiFactory;
@@ -27,7 +28,7 @@ use Illuminate\Support\Collection;
 class AnakPanti extends Model
 {
     /** @use HasFactory<AnakPantiFactory> */
-    use HasFactory;
+    use HasFactory, TercatatDiLog;
 
     /**
      * Kolom yang bisa dipilih saat export: kunci => judul kolom.
@@ -233,5 +234,10 @@ class AnakPanti extends Model
     public function beratBadan(): HasMany
     {
         return $this->hasMany(BeratBadan::class, 'nik', 'NIK');
+    }
+
+    public function labelLog(): string
+    {
+        return (string) $this->Nama;
     }
 }

@@ -4,12 +4,14 @@ use App\Http\Controllers\Admin\AkunController;
 use App\Http\Controllers\Admin\AkunSayaController;
 use App\Http\Controllers\Admin\AnakPantiController;
 use App\Http\Controllers\Admin\BeritaController;
+use App\Http\Controllers\Admin\CadanganController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\DonasiController;
 use App\Http\Controllers\Admin\GaleriController;
 use App\Http\Controllers\Admin\KebutuhanPantiController;
 use App\Http\Controllers\Admin\KegiatanPantiController;
 use App\Http\Controllers\Admin\KesehatanController;
+use App\Http\Controllers\Admin\LogAktivitasController;
 use App\Http\Controllers\Admin\LoginController;
 use App\Http\Controllers\Admin\LupaPasswordController;
 use App\Http\Controllers\Admin\PengasuhController;
@@ -103,10 +105,12 @@ Route::middleware(['auth', 'auth.session', 'aktif'])->group(function () {
         Route::get('kesehatan', [KesehatanController::class, 'index'])->name('kesehatan.index');
         Route::get('kesehatan/timbang', [KesehatanController::class, 'timbang'])->name('kesehatan.timbang');
         Route::put('kesehatan/timbang', [KesehatanController::class, 'simpan'])->name('kesehatan.simpan');
+        Route::get('kesehatan/laporan', [KesehatanController::class, 'laporan'])->name('kesehatan.laporan');
 
         Route::get('donasi/ekspor', [DonasiController::class, 'ekspor'])->name('donasi.ekspor');
         Route::patch('donasi/{donasi}/status', [DonasiController::class, 'updateStatus'])->name('donasi.status');
         Route::get('donasi/{donasi}/bukti', [DonasiController::class, 'bukti'])->name('donasi.bukti');
+        Route::get('donasi/{donasi}/kuitansi', [DonasiController::class, 'kuitansi'])->name('donasi.kuitansi');
         Route::post('donasi/{donasi}/baca-bukti', [DonasiController::class, 'bacaBukti'])->middleware('throttle:10,1')->name('donasi.baca-bukti');
         Route::resource('donasi', DonasiController::class)
             ->except('show')
@@ -135,5 +139,13 @@ Route::middleware(['auth', 'auth.session', 'aktif'])->group(function () {
             ->except('show')
             ->parameters(['akun' => 'akun'])
             ->middleware('can:admin');
+
+        // Log aktivitas dan cadangan database khusus admin.
+        Route::middleware('can:admin')->group(function () {
+            Route::get('log-aktivitas', [LogAktivitasController::class, 'index'])->name('log-aktivitas.index');
+            Route::get('cadangan', [CadanganController::class, 'index'])->name('cadangan.index');
+            Route::post('cadangan', [CadanganController::class, 'store'])->middleware('throttle:3,1')->name('cadangan.store');
+            Route::get('cadangan/{nama}', [CadanganController::class, 'unduh'])->name('cadangan.unduh');
+        });
     });
 });

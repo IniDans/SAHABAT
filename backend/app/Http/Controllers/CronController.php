@@ -13,7 +13,7 @@ use Illuminate\Support\Facades\Artisan;
 class CronController extends Controller
 {
     /**
-     * Hapus token API kedaluwarsa dan token reset password lama.
+     * Hapus token API kedaluwarsa dan token reset password lama, lalu cadangkan database.
      */
     public function __invoke(Request $request): Response
     {
@@ -23,6 +23,7 @@ class CronController extends Controller
 
         Artisan::call('sanctum:prune-expired', ['--hours' => 24]);
         Artisan::call('auth:clear-resets');
+        Artisan::call('cadangan:buat');
 
         return response()->noContent();
     }

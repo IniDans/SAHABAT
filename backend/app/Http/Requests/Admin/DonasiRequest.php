@@ -26,6 +26,7 @@ class DonasiRequest extends FormRequest
             'email' => ['nullable', 'email', 'max:255'],
             'alamat' => ['nullable', 'string', 'max:500'],
             'program' => ['required', Rule::enum(ProgramDonasi::class)],
+            'kebutuhan_panti_id' => ['nullable', 'integer', Rule::exists('kebutuhan_panti', 'id')],
             'nominal' => ['required', 'integer', 'min:1000'],
             'metode_pembayaran' => ['required', Rule::enum(MetodePembayaran::class)],
             'tanggal_donasi' => ['required', 'date', 'before_or_equal:today'],
@@ -45,6 +46,7 @@ class DonasiRequest extends FormRequest
             'no_whatsapp' => 'no WhatsApp',
             'metode_pembayaran' => 'metode pembayaran',
             'tanggal_donasi' => 'tanggal donasi',
+            'kebutuhan_panti_id' => 'kebutuhan',
         ];
     }
 }

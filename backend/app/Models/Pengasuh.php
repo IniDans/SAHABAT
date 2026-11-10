@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\JenisKelamin;
+use App\Models\Concerns\TercatatDiLog;
 use Database\Factories\PengasuhFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Table;
@@ -17,7 +18,7 @@ use Illuminate\Database\Eloquent\Model;
 class Pengasuh extends Model
 {
     /** @use HasFactory<PengasuhFactory> */
-    use HasFactory;
+    use HasFactory, TercatatDiLog;
 
     /**
      * Get the attributes that should be cast.
@@ -30,5 +31,10 @@ class Pengasuh extends Model
             'Jenis_Kelamin' => JenisKelamin::class,
             'Tanggal_Lahir' => 'date:Y-m-d',
         ];
+    }
+
+    public function labelLog(): string
+    {
+        return (string) $this->Nama;
     }
 }

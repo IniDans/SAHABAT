@@ -20,6 +20,8 @@ Route::prefix('donasi')->name('donasi.')->group(function () {
     Route::post('formulir', [SiteController::class, 'kirimDonasi'])->middleware('throttle:5,1')->name('formulir.store');
     Route::get('validasi', [SiteController::class, 'validasiDonasi'])->name('validasi');
     Route::post('validasi', [SiteController::class, 'unggahBukti'])->middleware('throttle:5,1')->name('validasi.bukti');
+    Route::get('kuitansi', [SiteController::class, 'kuitansiDonasi'])->middleware('throttle:10,1')->name('kuitansi');
+    Route::get('laporan', [SiteController::class, 'laporanDonasi'])->name('laporan');
     Route::view('cara-qris', 'site.donasi.cara-qris')->name('qris');
     Route::view('rekening', 'site.donasi.rekening')->name('rekening');
 });

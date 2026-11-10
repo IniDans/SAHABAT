@@ -7,7 +7,10 @@ use App\Enums\StatusDonasi;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\DonasiRequest;
 use App\Models\Donasi;
+use App\Models\KebutuhanPanti;
+use App\Services\KuitansiDonasi;
 use App\Services\PembacaBuktiTransfer;
+use App\Services\PemberitahuDonatur;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -15,6 +18,7 @@ use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class DonasiController extends Controller
@@ -40,6 +44,7 @@ class DonasiController extends Controller
         $bulan = $this->bulanDipilih($request, now()->format('Y-m'));
 
         $donasi = $this->filtered($request, $bulan)
+            ->with('kebutuhan')
             ->tap(fn (Builder $query) => $this->urutkan($query, $request))
             ->paginate(10)
             ->withQueryString();
@@ -76,9 +81,9 @@ class DonasiController extends Controller
             $out = fopen('php://output', 'w');
             // BOM agar Excel membaca huruf non-ASCII dengan benar.
             fwrite($out, "\xEF\xBB\xBF");
-            fputcsv($out, ['Tanggal', 'Nama donatur', 'Ditampilkan sebagai', 'No WhatsApp', 'Email', 'Alamat', 'Program', 'Nominal', 'Metode', 'Status', 'Keterangan']);
+            fputcsv($out, ['Tanggal', 'Nama donatur', 'Ditampilkan sebagai', 'No WhatsApp', 'Email', 'Alamat', 'Program', 'Kebutuhan', 'Nominal', 'Metode', 'Status', 'Keterangan']);
 
-            foreach ($query->lazy() as $item) {
+            foreach ($query->with('kebutuhan')->lazy() as $item) {
                 fputcsv($out, [
                     $item->tanggal_donasi->toDateString(),
                     $item->nama_donatur,
@@ -87,6 +92,7 @@ class DonasiController extends Controller
                     $item->email,
                     $item->alamat,
                     $item->program->value,
+                    $item->kebutuhan?->label(),
                     $item->nominal,
                     $item->metode_pembayaran->value,
                     $item->status->value,
@@ -103,15 +109,19 @@ class DonasiController extends Controller
      */
     public function create(): View
     {
-        return view('admin.donasi.form', ['donasi' => new Donasi(['tanggal_donasi' => today()])]);
+        return $this->form(new Donasi(['tanggal_donasi' => today()]));
     }
 
     /**
-     * Simpan donasi baru.
+     * Simpan donasi baru. Donasi yang langsung dicatat diterima/ditolak diberitahukan ke donatur lewat email.
      */
-    public function store(DonasiRequest $request): RedirectResponse
+    public function store(DonasiRequest $request, PemberitahuDonatur $pemberitahu): RedirectResponse
     {
-        Donasi::create($request->validated());
+        $donasi = Donasi::create($request->validated());
+
+        if ($donasi->status !== StatusDonasi::Menunggu) {
+            $pemberitahu->kirim($donasi);
+        }
 
         return to_route('admin.donasi.index')->with('status', 'Donasi berhasil dicatat.');
     }
@@ -121,23 +131,25 @@ class DonasiController extends Controller
      */
     public function edit(Donasi $donasi): View
     {
-        return view('admin.donasi.form', ['donasi' => $donasi]);
+        return $this->form($donasi);
     }
 
     /**
-     * Simpan perubahan donasi.
+     * Simpan perubahan donasi. Bila status berubah, donatur diberi tahu lewat email.
      */
-    public function update(DonasiRequest $request, Donasi $donasi): RedirectResponse
+    public function update(DonasiRequest $request, Donasi $donasi, PemberitahuDonatur $pemberitahu): RedirectResponse
     {
         $donasi->update($request->validated());
+
+        $this->beritahuBilaStatusBerubah($donasi, $pemberitahu);
 
         return to_route('admin.donasi.index')->with('status', 'Donasi berhasil diperbarui.');
     }
 
     /**
-     * Ubah status donasi langsung dari daftar (terima/tolak).
+     * Ubah status donasi langsung dari daftar (terima/tolak), lalu beri tahu donatur lewat email.
      */
-    public function updateStatus(Request $request, Donasi $donasi): RedirectResponse
+    public function updateStatus(Request $request, Donasi $donasi, PemberitahuDonatur $pemberitahu): RedirectResponse
     {
         $validated = $request->validate([
             'status' => ['required', Rule::enum(StatusDonasi::class)],
@@ -145,7 +157,19 @@ class DonasiController extends Controller
 
         $donasi->update($validated);
 
+        $this->beritahuBilaStatusBerubah($donasi, $pemberitahu);
+
         return back()->with('status', "Donasi {$donasi->nama_donatur} ditandai {$donasi->status->value}.");
+    }
+
+    /**
+     * Unduh kuitansi PDF donasi yang sudah diterima.
+     */
+    public function kuitansi(Donasi $donasi): Response
+    {
+        abort_unless($donasi->status === StatusDonasi::Diterima, 404);
+
+        return KuitansiDonasi::pdf($donasi)->download(KuitansiDonasi::namaFile($donasi));
     }
 
     /**
@@ -186,6 +210,27 @@ class DonasiController extends Controller
         $pembaca->bacaDonasi($donasi);
 
         return back()->with('status', 'Bukti transfer sudah dibaca ulang.');
+    }
+
+    private function form(Donasi $donasi): View
+    {
+        return view('admin.donasi.form', [
+            'donasi' => $donasi,
+            'pilihanKebutuhan' => KebutuhanPanti::query()
+                ->where(fn (Builder $query) => $query->where('terpenuhi', false)->when($donasi->kebutuhan_panti_id, fn ($q, $id) => $q->orWhereKey($id)))
+                ->palingMendesak()
+                ->get(),
+        ]);
+    }
+
+    /**
+     * Email donatur hanya bila status memang berubah ke Diterima atau Ditolak.
+     */
+    private function beritahuBilaStatusBerubah(Donasi $donasi, PemberitahuDonatur $pemberitahu): void
+    {
+        if ($donasi->wasChanged('status') && $donasi->status !== StatusDonasi::Menunggu) {
+            $pemberitahu->kirim($donasi);
+        }
     }
 
     /**

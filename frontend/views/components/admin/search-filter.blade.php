@@ -8,7 +8,7 @@
     </div>
     {{ $slot }}
     <button type="submit" class="admin-btn admin-btn-secondary">Terapkan</button>
-    @if (request()->hasAny(['search', 'kategori', 'status', 'prioritas', 'program', 'dari', 'sampai']))
+    @if (request()->hasAny(['search', 'kategori', 'status', 'prioritas', 'program', 'dari', 'sampai', 'user', 'jenis', 'aksi']))
         <a href="{{ request()->url() }}" class="text-[13px] text-slate hover:text-[#1e2328]">Reset</a>
     @endif
 </form>

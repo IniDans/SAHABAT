@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Enums\KategoriProgram;
 use App\Enums\StatusBerita;
+use App\Models\Concerns\TercatatDiLog;
 use App\Models\Concerns\Tulisan;
 use Database\Factories\ProgramFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
@@ -16,7 +17,7 @@ use Illuminate\Database\Eloquent\Model;
 class Program extends Model
 {
     /** @use HasFactory<ProgramFactory> */
-    use HasFactory, Tulisan;
+    use HasFactory, TercatatDiLog, Tulisan;
 
     /**
      * Folder gambar program di disk public.
@@ -63,5 +64,10 @@ class Program extends Model
     public static function kategoriBawaan(): array
     {
         return array_column(KategoriProgram::cases(), 'value');
+    }
+
+    public function labelLog(): string
+    {
+        return (string) $this->judul;
     }
 }

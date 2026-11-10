@@ -41,6 +41,13 @@
             </x-admin.field>
         </div>
 
+        <x-admin.field label="Target dana (Rp)" name="target_dana" hint="Opsional. Isi bila kebutuhan ini dibiayai dari donasi; progresnya tampil di formulir dan laporan donasi.">
+            <input id="target_dana" name="target_dana" type="number" min="1000" step="1" inputmode="numeric" value="{{ old('target_dana', $kebutuhan->target_dana) }}" class="admin-input sm:w-1/2" @error('target_dana') aria-invalid="true" aria-describedby="target_dana-error" @enderror>
+            @if ($kebutuhan->exists && $kebutuhan->target_dana)
+                <p class="mt-1 text-xs text-slate">Terkumpul {{ \App\Models\Donasi::rupiah($kebutuhan->danaTerkumpul()) }} ({{ $kebutuhan->persenTerkumpul() }}%).</p>
+            @endif
+        </x-admin.field>
+
         <div class="grid gap-5 sm:grid-cols-2">
             <x-admin.field label="Prioritas" name="prioritas" required>
                 <select id="prioritas" name="prioritas" required class="admin-input" @error('prioritas') aria-invalid="true" aria-describedby="prioritas-error" @enderror>

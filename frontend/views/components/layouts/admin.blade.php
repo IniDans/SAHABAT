@@ -13,7 +13,7 @@
         ],
         'Layanan' => [
             ['label' => 'Kebutuhan panti', 'icon' => 'package', 'route' => 'admin.kebutuhan-panti.index'],
-            ['label' => 'Donasi', 'icon' => 'heart', 'route' => 'admin.donasi.index'],
+            ['label' => 'Donasi', 'icon' => 'heart', 'route' => 'admin.donasi.index', 'badge' => $jumlahDonasiMenunggu ?: null],
             ['label' => 'Pesan masuk', 'icon' => 'mail', 'route' => 'admin.pesan.index', 'badge' => $jumlahPesanBaru ?: null],
         ],
         'Data' => [
@@ -25,9 +25,17 @@
         ],
         'Akun' => array_values(array_filter([
             auth()->user()->can('admin') ? ['label' => 'Kelola akun', 'icon' => 'user-cog', 'route' => 'admin.akun.index'] : null,
+            auth()->user()->can('admin') ? ['label' => 'Log aktivitas', 'icon' => 'history', 'route' => 'admin.log-aktivitas.index'] : null,
+            auth()->user()->can('admin') ? ['label' => 'Cadangan data', 'icon' => 'database', 'route' => 'admin.cadangan.index'] : null,
             ['label' => 'Akun saya', 'icon' => 'shield', 'route' => 'admin.akun-saya.edit'],
         ])),
     ];
+
+    $notifikasi = array_values(array_filter([
+        $jumlahDonasiMenunggu ? ['teks' => "{$jumlahDonasiMenunggu} donasi menunggu dicek", 'icon' => 'heart', 'url' => route('admin.donasi.index', ['status' => \App\Enums\StatusDonasi::Menunggu->value, 'bulan' => 'semua'])] : null,
+        $jumlahPesanBaru ? ['teks' => "{$jumlahPesanBaru} pesan belum dibaca", 'icon' => 'mail', 'url' => route('admin.pesan.index', ['status' => \App\Enums\StatusPesan::BelumDibaca->value])] : null,
+        $jumlahKebutuhanMendesak ? ['teks' => "{$jumlahKebutuhanMendesak} kebutuhan mendesak belum terpenuhi", 'icon' => 'package', 'url' => route('admin.kebutuhan-panti.index', ['prioritas' => \App\Enums\PrioritasKebutuhan::Mendesak->value, 'status' => 'belum'])] : null,
+    ]));
 @endphp
 
 <!DOCTYPE html>
@@ -99,9 +107,25 @@
 
             <div class="flex min-w-0 flex-1 flex-col">
                 <div class="flex items-center justify-end gap-4 px-4 pt-5 sm:px-8">
-                    <button type="button" class="flex size-9 items-center justify-center rounded-full text-slate hover:bg-white" aria-label="Notifikasi">
-                        <x-admin.icon name="bell" width="20" height="20" />
-                    </button>
+                    <details class="relative" data-notifikasi>
+                        <summary class="relative flex size-9 cursor-pointer list-none items-center justify-center rounded-full text-slate hover:bg-white [&::-webkit-details-marker]:hidden" aria-label="Notifikasi ({{ count($notifikasi) }})">
+                            <x-admin.icon name="bell" width="20" height="20" />
+                            @if ($notifikasi)
+                                <span class="absolute top-1.5 right-1.5 size-2 rounded-full bg-[#dc3c45] ring-2 ring-[#f3f4f2]"></span>
+                            @endif
+                        </summary>
+                        <div class="absolute right-0 z-30 mt-2 w-72 max-w-[calc(100vw-2rem)] rounded-lg border border-[#e5e5e5] bg-white py-2 text-[13px] shadow-lg">
+                            <p class="px-4 pb-2 text-xs font-semibold text-slate">Notifikasi</p>
+                            @forelse ($notifikasi as $item)
+                                <a href="{{ $item['url'] }}" class="flex items-center gap-3 px-4 py-2.5 hover:bg-surface">
+                                    <x-admin.icon :name="$item['icon']" width="16" height="16" class="shrink-0 text-footer" />
+                                    {{ $item['teks'] }}
+                                </a>
+                            @empty
+                                <p class="px-4 py-2.5 text-slate">Tidak ada yang perlu ditindaklanjuti.</p>
+                            @endforelse
+                        </div>
+                    </details>
                     <a href="{{ route('admin.pesan.index', $jumlahPesanBaru ? ['status' => \App\Enums\StatusPesan::BelumDibaca->value] : []) }}" class="relative flex size-9 items-center justify-center rounded-full text-slate hover:bg-white" aria-label="Pesan masuk ({{ $jumlahPesanBaru }} belum dibaca)">
                         <x-admin.icon name="mail" width="20" height="20" />
                         @if ($jumlahPesanBaru)

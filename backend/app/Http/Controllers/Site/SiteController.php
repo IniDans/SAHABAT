@@ -15,11 +15,14 @@ use App\Models\KebutuhanPanti;
 use App\Models\Pesan;
 use App\Models\ProfilPanti;
 use App\Models\Program;
+use App\Services\KuitansiDonasi;
 use App\Services\PembacaBuktiTransfer;
+use App\Services\PemberitahuDonatur;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
+use Symfony\Component\HttpFoundation\Response;
 
 /**
  * Halaman website publik. Artikel dan program diambil dari tulisan yang terbit di panel admin;
@@ -62,7 +65,8 @@ class SiteController extends Controller
     public function formulirDonasi(): View
     {
         return view('site.donasi.formulir', [
-            'kebutuhan' => KebutuhanPanti::where('terpenuhi', false)->palingMendesak()->limit(8)->get(),
+            'kebutuhan' => KebutuhanPanti::where('terpenuhi', false)->palingMendesak()->denganDanaTerkumpul()->limit(8)->get(),
+            'kebutuhanMendesak' => KebutuhanPanti::mendesak()->orderByDesc('skor_prioritas')->orderBy('nama')->get(),
         ]);
     }
 
@@ -107,7 +111,7 @@ class SiteController extends Controller
     /**
      * Catat donasi dari formulir publik dengan status Menunggu sampai dana dicek admin.
      */
-    public function kirimDonasi(DonasiRequest $request): RedirectResponse
+    public function kirimDonasi(DonasiRequest $request, PemberitahuDonatur $pemberitahu): RedirectResponse
     {
         $donasi = Donasi::create([
             ...$request->validated(),
@@ -115,10 +119,12 @@ class SiteController extends Controller
             'status' => StatusDonasi::Menunggu,
         ]);
 
+        $pemberitahu->kirim($donasi);
+
         return to_route('donasi.rekening')->with('status', sprintf(
             'Terima kasih, %s. Donasi %s sebesar %s sudah tercatat. Silakan transfer melalui %s ke rekening di bawah ini.',
             $donasi->nama_donatur,
-            $donasi->program->value,
+            $donasi->tujuan(),
             Donasi::rupiah($donasi->nominal),
             $donasi->metode_pembayaran->value,
         ))->with('kunci', $donasi->kunci);
@@ -175,6 +181,50 @@ class SiteController extends Controller
 
         return to_route('donasi.validasi', ['kunci' => $donasi->kunci])
             ->with('status', 'Bukti transfer terkirim. Pengurus akan mengonfirmasi donasi Anda.');
+    }
+
+    /**
+     * Unduh kuitansi PDF untuk donasi yang sudah diterima.
+     */
+    public function kuitansiDonasi(Request $request): Response
+    {
+        $donasi = Donasi::dariKunci($request->string('kunci')->trim()->value());
+
+        abort_unless($donasi?->status === StatusDonasi::Diterima, 404);
+
+        return KuitansiDonasi::pdf($donasi)->download(KuitansiDonasi::namaFile($donasi));
+    }
+
+    /**
+     * Laporan donasi diterima per tahun: total per bulan, per program, progres kebutuhan, dan donatur terbaru.
+     */
+    public function laporanDonasi(Request $request): View
+    {
+        $daftarTahun = Donasi::diterima()->pluck('tanggal_donasi')
+            ->map(fn ($tanggal): int => $tanggal->year)
+            ->push((int) now()->year)
+            ->unique()->sortDesc()->values();
+
+        $tahun = $daftarTahun->contains($request->integer('tahun')) ? $request->integer('tahun') : $daftarTahun->first();
+
+        $donasi = Donasi::diterima()->whereYear('tanggal_donasi', $tahun)->with('kebutuhan')->latest('tanggal_donasi')->latest('id')->get();
+
+        $perBulan = collect(range(1, 12))->mapWithKeys(fn (int $bulan): array => [
+            $bulan => $donasi->filter(fn (Donasi $item): bool => $item->tanggal_donasi->month === $bulan)->sum('nominal'),
+        ]);
+
+        return view('site.donasi.laporan', [
+            'tahun' => $tahun,
+            'daftarTahun' => $daftarTahun,
+            'total' => $donasi->sum('nominal'),
+            'jumlahDonasi' => $donasi->count(),
+            'perBulan' => $perBulan,
+            'perProgram' => collect(ProgramDonasi::cases())->mapWithKeys(fn (ProgramDonasi $program): array => [
+                $program->value => $donasi->where('program', $program)->sum('nominal'),
+            ]),
+            'kebutuhan' => KebutuhanPanti::whereNotNull('target_dana')->palingMendesak()->denganDanaTerkumpul()->get(),
+            'donatur' => $donasi->take(20),
+        ]);
     }
 
     public function anakAsuh(Request $request): View

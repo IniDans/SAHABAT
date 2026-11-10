@@ -4,6 +4,7 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use App\Enums\Role;
+use App\Models\Concerns\TercatatDiLog;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
@@ -18,7 +19,7 @@ use Laravel\Sanctum\HasApiTokens;
 class User extends Authenticatable
 {
     /** @use HasFactory<UserFactory> */
-    use HasApiTokens, HasFactory, Notifiable;
+    use HasApiTokens, HasFactory, Notifiable, TercatatDiLog;
 
     /**
      * Default yang sama dengan migration, supaya respons setelah create langsung lengkap.
@@ -67,5 +68,10 @@ class User extends Authenticatable
 
         $this->setRememberToken(Str::random(60));
         $this->save();
+    }
+
+    public function labelLog(): string
+    {
+        return (string) $this->name;
     }
 }
