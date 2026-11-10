@@ -21,7 +21,7 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-// Dipanggil Vercel Cron sekali sehari, dilindungi CRON_SECRET.
+// Untuk layanan cron eksternal bila scheduler tidak berjalan, dilindungi CRON_SECRET.
 Route::get('cron/bersihkan', CronController::class)->name('cron.bersihkan');
 
 Route::post('auth/login', [AuthController::class, 'login'])

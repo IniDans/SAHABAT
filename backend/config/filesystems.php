@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Cloudflare R2 (kompatibel S3) untuk server tanpa disk tetap, mis. Vercel.
+ * Cloudflare R2 (kompatibel S3) untuk server tanpa disk tetap.
  * R2 tidak mengenal ACL per file: akses publik diatur dari pengaturan bucket.
  */
 $r2 = fn (?string $bucket): array => [

@@ -28,7 +28,7 @@ trait MembacaDenganGemini
         }
 
         try {
-            // Di bawah batas 60 detik Vercel, supaya admin tetap mendapat pesan bila Gemini lambat.
+            // Dibatasi 40 detik supaya admin tetap mendapat pesan bila Gemini lambat.
             // Model yang sedang sibuk (503) biasanya pulih dalam beberapa detik, jadi dicoba ulang dua kali.
             $response = Http::withHeaders(['x-goog-api-key' => $apiKey])
                 ->timeout(40)
