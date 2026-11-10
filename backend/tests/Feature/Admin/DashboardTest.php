@@ -47,4 +47,19 @@ class DashboardTest extends TestCase
             ->get(route('admin.dashboard'))
             ->assertSee('Belum ada kebutuhan.');
     }
+
+    public function test_notification_dropdown_lists_waiting_donations_and_urgent_needs(): void
+    {
+        Donasi::factory()->count(2)->create();
+        Donasi::factory()->diterima()->create();
+        KebutuhanPanti::factory()->mendesak()->create();
+        KebutuhanPanti::factory()->mendesak()->terpenuhi()->create();
+
+        $this->actingAs(User::factory()->create())
+            ->get(route('admin.dashboard'))
+            ->assertOk()
+            ->assertSee('data-notifikasi', false)
+            ->assertSee('2 donasi menunggu dicek')
+            ->assertSee('1 kebutuhan mendesak belum terpenuhi');
+    }
 }

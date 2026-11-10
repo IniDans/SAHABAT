@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Enums\KategoriBerita;
 use App\Enums\StatusBerita;
+use App\Models\Concerns\TercatatDiLog;
 use App\Models\Concerns\Tulisan;
 use Database\Factories\BeritaFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
@@ -16,7 +17,7 @@ use Illuminate\Database\Eloquent\Model;
 class Berita extends Model
 {
     /** @use HasFactory<BeritaFactory> */
-    use HasFactory, Tulisan;
+    use HasFactory, TercatatDiLog, Tulisan;
 
     /**
      * Folder gambar berita di disk public.
@@ -49,5 +50,10 @@ class Berita extends Model
     public static function kategoriBawaan(): array
     {
         return array_column(KategoriBerita::cases(), 'value');
+    }
+
+    public function labelLog(): string
+    {
+        return (string) $this->judul;
     }
 }

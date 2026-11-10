@@ -115,6 +115,9 @@
                             <td class="px-4 py-3 whitespace-nowrap">{{ $item->tampil_sebagai->value }}</td>
                             <td class="px-4 py-3">
                                 <p class="font-semibold">{{ $item->program->value }}</p>
+                                @if ($item->kebutuhan)
+                                    <p class="text-xs text-footer">untuk {{ $item->kebutuhan->label() }}</p>
+                                @endif
                                 @if ($item->keterangan)
                                     <p class="line-clamp-1 text-xs text-slate">{{ $item->keterangan }}</p>
                                 @endif
@@ -149,6 +152,16 @@
                                                 <x-admin.icon name="x" width="16" height="16" />
                                             </button>
                                         </form>
+                                    @endif
+                                    @if ($tautanWa = $item->tautanWhatsapp())
+                                        <a href="{{ $tautanWa }}" target="_blank" rel="noopener" class="admin-icon-btn hover:text-footer" aria-label="Kirim WhatsApp ke {{ $item->nama_donatur }}" title="Kirim WhatsApp">
+                                            <x-site.whatsapp-icon width="16" height="16" />
+                                        </a>
+                                    @endif
+                                    @if ($item->status === StatusDonasi::Diterima)
+                                        <a href="{{ route('admin.donasi.kuitansi', $item) }}" class="admin-icon-btn" aria-label="Unduh kuitansi donasi {{ $item->nama_donatur }}" title="Kuitansi">
+                                            <x-admin.icon name="receipt" width="16" height="16" />
+                                        </a>
                                     @endif
                                     <a href="{{ route('admin.donasi.edit', $item) }}" class="admin-icon-btn" aria-label="Ubah donasi {{ $item->nama_donatur }}" title="Ubah">
                                         <x-admin.icon name="pencil" width="16" height="16" />

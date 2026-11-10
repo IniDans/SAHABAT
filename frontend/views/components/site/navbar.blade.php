@@ -8,6 +8,7 @@
             ['label' => 'Validasi Donasi', 'route' => 'donasi.validasi'],
             ['label' => 'Cara Donasi QRIS', 'route' => 'donasi.qris'],
             ['label' => 'Rekening Donasi', 'route' => 'donasi.rekening'],
+            ['label' => 'Laporan Donasi', 'route' => 'donasi.laporan'],
         ]],
         ['label' => 'Program', 'active' => 'program.*', 'children' => [
             ['label' => 'Semua Program', 'route' => 'program.index'],

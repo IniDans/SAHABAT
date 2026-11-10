@@ -11,3 +11,6 @@ Artisan::command('inspire', function () {
 // Hapus token API yang sudah kedaluwarsa (lihat SANCTUM_EXPIRATION) dan token reset password lama.
 Schedule::command('sanctum:prune-expired --hours=24')->daily();
 Schedule::command('auth:clear-resets')->everyFifteenMinutes();
+
+// Cadangan database harian ke disk privat; 14 cadangan terakhir disimpan.
+Schedule::command('cadangan:buat')->dailyAt('02:00');

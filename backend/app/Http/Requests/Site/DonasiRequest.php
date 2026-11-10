@@ -3,8 +3,10 @@
 namespace App\Http\Requests\Site;
 
 use App\Enums\MetodePembayaran;
+use App\Enums\PrioritasKebutuhan;
 use App\Enums\ProgramDonasi;
 use App\Enums\TampilanDonatur;
+use App\Models\Donasi;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
@@ -13,6 +15,7 @@ class DonasiRequest extends FormRequest
 {
     /**
      * Rapikan nominal ("Rp10.000") dan nomor WhatsApp (+62 / 62 / 8xx) sebelum divalidasi.
+     * Pilihan kebutuhan mendesak ("kebutuhan-3") dicatat sebagai program Sedekah untuk kebutuhan itu.
      */
     protected function prepareForValidation(): void
     {
@@ -24,7 +27,12 @@ class DonasiRequest extends FormRequest
             $nomor = '0'.$nomor;
         }
 
+        $tujuan = (string) $this->input('program');
+        $kebutuhanId = str_starts_with($tujuan, Donasi::AWALAN_KEBUTUHAN) ? substr($tujuan, strlen(Donasi::AWALAN_KEBUTUHAN)) : null;
+
         $this->merge([
+            'program' => $kebutuhanId !== null ? Donasi::PROGRAM_KEBUTUHAN->value : $tujuan,
+            'kebutuhan_panti_id' => $kebutuhanId,
             'nominal' => preg_replace('/\D/', '', (string) $this->input('nominal')),
             'no_whatsapp' => $nomor,
         ]);
@@ -39,6 +47,9 @@ class DonasiRequest extends FormRequest
     {
         return [
             'program' => ['required', Rule::enum(ProgramDonasi::class)],
+            'kebutuhan_panti_id' => ['nullable', 'integer', Rule::exists('kebutuhan_panti', 'id')
+                ->where('prioritas', PrioritasKebutuhan::Mendesak->value)
+                ->where('terpenuhi', 0)],
             'nominal' => ['required', 'integer', 'min:10000', 'max:1000000000'],
             'nama_donatur' => ['required', 'string', 'max:255'],
             'tampil_sebagai' => ['required', Rule::enum(TampilanDonatur::class)],
@@ -60,6 +71,16 @@ class DonasiRequest extends FormRequest
             'tampil_sebagai' => 'nama yang ditampilkan',
             'no_whatsapp' => 'no WhatsApp',
             'metode_pembayaran' => 'metode pembayaran',
+        ];
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    public function messages(): array
+    {
+        return [
+            'kebutuhan_panti_id.*' => 'Kebutuhan yang dipilih sudah tidak tersedia. Silakan pilih tujuan donasi lain.',
         ];
     }
 }

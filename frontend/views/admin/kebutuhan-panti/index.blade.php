@@ -62,6 +62,7 @@
                         <th scope="col" class="px-4 py-3 font-semibold">Nama kebutuhan</th>
                         <th scope="col" class="px-4 py-3 font-semibold">Kategori</th>
                         <th scope="col" class="px-4 py-3 font-semibold">Jumlah</th>
+                        <th scope="col" class="px-4 py-3 font-semibold">Dana terkumpul</th>
                         <th scope="col" class="px-4 py-3 font-semibold">Urgensi</th>
                         <th scope="col" class="px-4 py-3 font-semibold">Status</th>
                         <th scope="col" class="px-4 py-3 text-right font-semibold">Aksi</th>
@@ -79,6 +80,18 @@
                             <td class="px-4 py-3">{{ $item->kategori->value }}</td>
                             <td class="px-4 py-3 whitespace-nowrap">
                                 {{ $item->jumlah ? number_format($item->jumlah, 0, ',', '.').' '.$item->satuan : '-' }}
+                            </td>
+                            <td class="px-4 py-3 whitespace-nowrap">
+                                @if ($item->target_dana)
+                                    <p class="tabular-nums">{{ \App\Models\Donasi::rupiah($item->danaTerkumpul()) }} <span class="text-slate">/ {{ \App\Models\Donasi::rupiah($item->target_dana) }}</span></p>
+                                    <div class="mt-1 h-1.5 w-32 overflow-hidden rounded-full bg-[#eef0ee]" role="progressbar" aria-label="Dana terkumpul {{ $item->nama }}" aria-valuemin="0" aria-valuemax="100" aria-valuenow="{{ $item->persenTerkumpul() }}">
+                                        <div class="h-full rounded-full bg-footer" style="width: {{ $item->persenTerkumpul() }}%"></div>
+                                    </div>
+                                @elseif ($item->danaTerkumpul())
+                                    <p class="tabular-nums">{{ \App\Models\Donasi::rupiah($item->danaTerkumpul()) }}</p>
+                                @else
+                                    <span class="text-slate">-</span>
+                                @endif
                             </td>
                             <td class="px-4 py-3">
                                 <x-admin.badge :tone="$prioritasTone[$item->prioritas->value]">{{ $item->prioritas->value }}</x-admin.badge>
@@ -117,7 +130,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="6" class="px-4 py-12 text-center text-slate">Belum ada kebutuhan.</td>
+                            <td colspan="7" class="px-4 py-12 text-center text-slate">Belum ada kebutuhan.</td>
                         </tr>
                     @endforelse
                 </tbody>

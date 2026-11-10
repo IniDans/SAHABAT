@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\TercatatDiLog;
 use Database\Factories\FotoGaleriFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Scope;
@@ -17,7 +18,7 @@ use Illuminate\Support\Facades\Storage;
 class FotoGaleri extends Model
 {
     /** @use HasFactory<FotoGaleriFactory> */
-    use HasFactory;
+    use HasFactory, TercatatDiLog;
 
     /**
      * Folder foto galeri di disk public.
@@ -92,5 +93,20 @@ class FotoGaleri extends Model
                 }
             }
         });
+    }
+
+    public function labelLog(): string
+    {
+        return $this->keterangan ?: 'Foto #'.$this->getKey();
+    }
+
+    /**
+     * Mengurutkan galeri mengubah banyak foto sekaligus; tidak perlu dicatat satu per satu.
+     *
+     * @return list<string>
+     */
+    public function kolomTanpaLog(): array
+    {
+        return ['created_at', 'updated_at', 'urutan'];
     }
 }

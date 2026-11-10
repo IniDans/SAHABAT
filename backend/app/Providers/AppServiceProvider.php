@@ -2,7 +2,10 @@
 
 namespace App\Providers;
 
+use App\Enums\StatusDonasi;
 use App\Enums\StatusPesan;
+use App\Models\Donasi;
+use App\Models\KebutuhanPanti;
 use App\Models\Pesan;
 use App\Models\ProfilPanti;
 use App\Models\User;
@@ -61,9 +64,13 @@ class AppServiceProvider extends ServiceProvider
             ->line('Jika Anda tidak meminta reset password, abaikan email ini. Password Anda tidak berubah.')
             ->salutation('Salam, Panti Asuhan YASIBU'));
 
-        // Jumlah pesan belum dibaca untuk badge di sidebar dan topbar admin.
+        // Angka notifikasi untuk badge sidebar dan lonceng di topbar admin.
         View::composer('components.layouts.admin', function ($view): void {
-            $view->with('jumlahPesanBaru', Pesan::where('status', StatusPesan::BelumDibaca)->count());
+            $view->with([
+                'jumlahPesanBaru' => Pesan::where('status', StatusPesan::BelumDibaca)->count(),
+                'jumlahDonasiMenunggu' => Donasi::where('status', StatusDonasi::Menunggu)->count(),
+                'jumlahKebutuhanMendesak' => KebutuhanPanti::mendesak()->count(),
+            ]);
         });
 
         // Alamat dan media sosial di footer website diatur dari menu Profil panti.

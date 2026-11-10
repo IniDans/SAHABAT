@@ -831,6 +831,30 @@ function initTinjauPindai() {
     }
 }
 
+/**
+ * Tutup dropdown notifikasi admin saat klik di luar atau menekan Escape.
+ */
+function initNotifikasi() {
+    const notifikasi = document.querySelector('[data-notifikasi]');
+
+    if (!notifikasi) {
+        return;
+    }
+
+    document.addEventListener('click', (event) => {
+        if (notifikasi.open && !notifikasi.contains(event.target)) {
+            notifikasi.open = false;
+        }
+    });
+
+    document.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape' && notifikasi.open) {
+            notifikasi.open = false;
+            notifikasi.querySelector('summary').focus();
+        }
+    });
+}
+
 document.addEventListener('DOMContentLoaded', () => {
     initSliders();
     initNavigation();
@@ -852,4 +876,5 @@ document.addEventListener('DOMContentLoaded', () => {
     initTinjauPindai();
     initGrafikTren();
     initRepeater();
+    initNotifikasi();
 });

@@ -7,11 +7,17 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\BeratBadanRequest;
 use App\Models\AnakPanti;
 use App\Models\BeratBadan;
+use App\Models\KegiatanPanti;
+use App\Models\LogAktivitas;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\CarbonImmutable;
+use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 use Illuminate\View\View;
+use Symfony\Component\HttpFoundation\Response;
 
 class KesehatanController extends Controller
 {
@@ -108,8 +114,49 @@ class KesehatanController extends Controller
 
         $namaBulan = $bulan->locale('id')->translatedFormat('F Y');
 
+        LogAktivitas::catat(LogAktivitas::AKSI_UBAH, label: "Penimbangan {$namaBulan} ({$jumlahTersimpan} anak)", jenis: 'BeratBadan');
+
         return to_route('admin.kesehatan.timbang', ['bulan' => $bulan->format('Y-m')])
             ->with('status', "Berat badan {$jumlahTersimpan} anak untuk {$namaBulan} disimpan.");
+    }
+
+    /**
+     * Laporan bulanan anak dalam PDF, satu halaman per anak: identitas, status gizi bulan itu,
+     * riwayat berat 6 bulan, dan kegiatan panti pada bulan itu. ?nik= untuk satu anak saja.
+     */
+    public function laporan(Request $request): Response
+    {
+        $bulan = $this->bulanDariQuery($request) ?? BeratBadan::bulanTerakhir();
+        $nik = $request->string('nik')->trim()->value();
+
+        $skrining = AnakPanti::skriningGizi($bulan)
+            ->when($nik !== '', fn ($daftar) => $daftar->filter(fn (array $hasil): bool => (string) $hasil['anak']->NIK === $nik))
+            ->values();
+
+        abort_if($skrining->isEmpty(), 404);
+
+        (new EloquentCollection($skrining->pluck('anak')->all()))->load('wali');
+
+        $riwayat = BeratBadan::query()
+            ->whereIn('nik', $skrining->map(fn (array $hasil): string => (string) $hasil['anak']->NIK))
+            ->whereBetween('bulan', [$bulan->subMonths(5)->toDateString(), $bulan->toDateString()])
+            ->orderBy('bulan')
+            ->get()
+            ->groupBy(fn (BeratBadan $item): string => (string) $item->nik);
+
+        $kegiatan = KegiatanPanti::query()
+            ->whereBetween('tanggal_kegiatan', [$bulan->toDateString(), $bulan->endOfMonth()->toDateString()])
+            ->orderBy('tanggal_kegiatan')
+            ->get();
+
+        $namaFile = 'laporan-anak-'.$bulan->format('Y-m').($nik !== '' ? '-'.Str::slug($skrining->first()['anak']->Nama) : '').'.pdf';
+
+        return Pdf::loadView('admin.kesehatan.laporan', [
+            'bulan' => $bulan,
+            'skrining' => $skrining,
+            'riwayat' => $riwayat,
+            'kegiatan' => $kegiatan,
+        ])->setPaper('a4')->download($namaFile);
     }
 
     /**

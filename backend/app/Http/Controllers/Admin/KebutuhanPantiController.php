@@ -25,6 +25,7 @@ class KebutuhanPantiController extends Controller
             ->when($request->enum('kategori', KategoriKebutuhan::class), fn ($q, $kategori) => $q->where('kategori', $kategori))
             ->when($request->string('status')->value(), fn ($q, $status) => $q->where('terpenuhi', $status === 'terpenuhi'))
             ->palingMendesak()
+            ->denganDanaTerkumpul()
             ->paginate(10)
             ->withQueryString();
 

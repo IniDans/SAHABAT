@@ -40,8 +40,8 @@
                     <dl class="mt-4 grid gap-x-6 gap-y-2 sm:grid-cols-[auto_1fr]">
                         <dt class="text-slate-light">Atas nama</dt>
                         <dd>{{ $donasi->namaTampil() }}</dd>
-                        <dt class="text-slate-light">Program</dt>
-                        <dd>{{ $donasi->program->value }}</dd>
+                        <dt class="text-slate-light">Tujuan</dt>
+                        <dd>{{ $donasi->tujuan() }}</dd>
                         <dt class="text-slate-light">Nominal</dt>
                         <dd class="font-semibold">{{ Donasi::rupiah($donasi->nominal) }}</dd>
                         <dt class="text-slate-light">Metode</dt>
@@ -49,6 +49,13 @@
                         <dt class="text-slate-light">Tanggal</dt>
                         <dd>{{ $donasi->tanggal_donasi->format('d/m/Y') }}</dd>
                     </dl>
+
+                    @if ($donasi->status === StatusDonasi::Diterima)
+                        <div class="mt-5 border-t border-[#e6e6e6] pt-4">
+                            <p class="font-bold text-ink-dark">Donasi sudah diterima. Terima kasih!</p>
+                            <a href="{{ route('donasi.kuitansi', ['kunci' => $donasi->kunci]) }}" class="btn-primary mt-3 inline-flex h-10 items-center text-sm">Unduh kuitansi (PDF)</a>
+                        </div>
+                    @endif
 
                     @if ($donasi->bukti_transfer)
                         <div class="mt-5 border-t border-[#e6e6e6] pt-4">

@@ -2,8 +2,18 @@
     use App\Enums\MetodePembayaran;
     use App\Enums\ProgramDonasi;
     use App\Enums\TampilanDonatur;
+    use App\Models\Donasi;
 
     $programOptions = collect(ProgramDonasi::cases())->mapWithKeys(fn ($case) => [$case->value => $case->value]);
+
+    if ($kebutuhanMendesak->isNotEmpty()) {
+        $programOptions['Kebutuhan mendesak'] = $kebutuhanMendesak->mapWithKeys(fn ($item) => [Donasi::AWALAN_KEBUTUHAN.$item->id => $item->label()]);
+    }
+
+    $kebutuhanLama = old('kebutuhan_panti_id', request('kebutuhan'));
+    $tujuanTerpilih = $kebutuhanLama && $kebutuhanMendesak->contains('id', (int) $kebutuhanLama)
+        ? Donasi::AWALAN_KEBUTUHAN.$kebutuhanLama
+        : old('program', request('program', ProgramDonasi::Zakat->value));
     $metodeOptions = collect(MetodePembayaran::cases())->mapWithKeys(fn ($case) => [$case->value => $case->value]);
 @endphp
 
@@ -30,6 +40,17 @@
                             @if ($item->keterangan)
                                 <p class="mt-1 line-clamp-2 text-sm text-ink">{{ $item->keterangan }}</p>
                             @endif
+                            @if ($item->target_dana)
+                                <div class="mt-2">
+                                    <div class="h-1.5 overflow-hidden rounded-full bg-[#e9ecef]" role="progressbar" aria-label="Dana terkumpul untuk {{ $item->nama }}" aria-valuemin="0" aria-valuemax="100" aria-valuenow="{{ $item->persenTerkumpul() }}">
+                                        <div class="h-full rounded-full bg-brand-green" style="width: {{ $item->persenTerkumpul() }}%"></div>
+                                    </div>
+                                    <p class="mt-1 text-xs text-slate-light">{{ Donasi::rupiah($item->danaTerkumpul()) }} dari {{ Donasi::rupiah($item->target_dana) }}</p>
+                                </div>
+                            @endif
+                            @if ($kebutuhanMendesak->contains('id', $item->id))
+                                <a href="{{ route('donasi.formulir', ['kebutuhan' => $item->id]) }}#program" class="mt-2 inline-block text-sm font-semibold text-brand-red hover:underline">Donasi untuk ini</a>
+                            @endif
                         </li>
                     @endforeach
                 </ul>
@@ -40,9 +61,15 @@
             @csrf
 
             <div>
-                <label for="program" class="form-label mb-1">Program Donasi <span class="required">*</span></label>
-                <x-form.select id="program" name="program" required :options="$programOptions" :selected="old('program', request('program', ProgramDonasi::Zakat->value))" />
+                <label for="program" class="form-label mb-1">Tujuan Donasi <span class="required">*</span></label>
+                <x-form.select id="program" name="program" required :options="$programOptions" :selected="$tujuanTerpilih" />
+                @if ($kebutuhanMendesak->isNotEmpty())
+                    <p class="mt-1 font-open text-[13px] text-placeholder">Pilih salah satu kebutuhan mendesak agar donasi Anda langsung dipakai untuk kebutuhan itu.</p>
+                @endif
                 @error('program')
+                    <p class="form-error">{{ $message }}</p>
+                @enderror
+                @error('kebutuhan_panti_id')
                     <p class="form-error">{{ $message }}</p>
                 @enderror
             </div>

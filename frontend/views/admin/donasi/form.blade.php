@@ -63,6 +63,15 @@
             </x-admin.field>
         </div>
 
+        <x-admin.field label="Untuk kebutuhan" name="kebutuhan_panti_id" hint="Opsional. Pilih bila donasi ini khusus untuk salah satu kebutuhan panti; dananya ikut dihitung di progres kebutuhan itu.">
+            <select id="kebutuhan_panti_id" name="kebutuhan_panti_id" class="admin-input" @error('kebutuhan_panti_id') aria-invalid="true" aria-describedby="kebutuhan_panti_id-error" @enderror>
+                <option value="">Tidak untuk kebutuhan tertentu</option>
+                @foreach ($pilihanKebutuhan as $kebutuhan)
+                    <option value="{{ $kebutuhan->id }}" @selected((string) old('kebutuhan_panti_id', $donasi->kebutuhan_panti_id) === (string) $kebutuhan->id)>{{ $kebutuhan->label() }} &middot; {{ $kebutuhan->prioritas->value }}</option>
+                @endforeach
+            </select>
+        </x-admin.field>
+
         <div class="grid gap-5 sm:grid-cols-2">
             <x-admin.field label="Metode pembayaran" name="metode_pembayaran" required>
                 <select id="metode_pembayaran" name="metode_pembayaran" required class="admin-input" @error('metode_pembayaran') aria-invalid="true" aria-describedby="metode_pembayaran-error" @enderror>

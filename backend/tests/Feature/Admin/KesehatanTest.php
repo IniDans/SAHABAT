@@ -6,6 +6,7 @@ use App\Enums\JenisKelamin;
 use App\Enums\StatusGizi;
 use App\Models\AnakPanti;
 use App\Models\BeratBadan;
+use App\Models\KegiatanPanti;
 use App\Models\User;
 use Carbon\CarbonImmutable;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -173,6 +174,46 @@ class KesehatanTest extends TestCase
      *
      * @param  array<string, float>  $berat
      */
+    public function test_monthly_report_downloads_as_pdf_for_all_or_one_child(): void
+    {
+        $raka = $this->anak('RAKA PRATAMA', JenisKelamin::LakiLaki, '2017-10-01', ['2026-05' => 23.0, '2026-09' => 24.1, '2026-10' => 23.4]);
+        $this->anak('SITI', JenisKelamin::Perempuan, '2019-10-01', ['2026-10' => 21.0]);
+        KegiatanPanti::factory()->create(['nama_kegiatan' => 'Pengajian rutin', 'tanggal_kegiatan' => '2026-10-03']);
+        $this->actingAs(User::factory()->create());
+
+        $this->get(route('admin.kesehatan.laporan', ['bulan' => '2026-10']))
+            ->assertOk()
+            ->assertHeader('Content-Type', 'application/pdf')
+            ->assertDownload('laporan-anak-2026-10.pdf');
+
+        $this->get(route('admin.kesehatan.laporan', ['bulan' => '2026-10', 'nik' => $raka->NIK]))
+            ->assertDownload('laporan-anak-2026-10-raka-pratama.pdf');
+
+        $this->get(route('admin.kesehatan.laporan', ['nik' => 'tidak-ada']))->assertNotFound();
+        $this->get(route('admin.kesehatan.index'))->assertSee(route('admin.kesehatan.laporan', ['bulan' => '2026-10']), false);
+    }
+
+    public function test_monthly_report_page_lists_history_status_and_activities(): void
+    {
+        $this->anak('RAKA PRATAMA', JenisKelamin::LakiLaki, '2017-10-01', ['2026-04' => 22.0, '2026-05' => 23.0, '2026-10' => 23.4]);
+        KegiatanPanti::factory()->create(['nama_kegiatan' => 'Pengajian rutin', 'tanggal_kegiatan' => '2026-10-03']);
+        KegiatanPanti::factory()->create(['nama_kegiatan' => 'Lomba September', 'tanggal_kegiatan' => '2026-09-20']);
+
+        $html = view('admin.kesehatan.laporan', [
+            'bulan' => CarbonImmutable::parse('2026-10-01'),
+            'skrining' => AnakPanti::skriningGizi(CarbonImmutable::parse('2026-10-01')),
+            'riwayat' => BeratBadan::where('bulan', '>=', '2026-05-01')->orderBy('bulan')->get()->groupBy('nik'),
+            'kegiatan' => KegiatanPanti::where('tanggal_kegiatan', '>=', '2026-10-01')->get(),
+        ])->render();
+
+        $this->assertStringContainsString('RAKA PRATAMA', $html);
+        $this->assertStringContainsString('Mei 2026', $html);
+        $this->assertStringNotContainsString('April 2026', $html);
+        $this->assertStringContainsString('23,4 kg', $html);
+        $this->assertStringContainsString('Pengajian rutin', $html);
+        $this->assertStringNotContainsString('Lomba September', $html);
+    }
+
     private function anak(string $nama, JenisKelamin $jenisKelamin, string $tanggalLahir, array $berat, string $kesehatan = 'Sehat'): AnakPanti
     {
         $anak = AnakPanti::factory()->create([

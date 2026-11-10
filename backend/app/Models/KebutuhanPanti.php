@@ -4,6 +4,8 @@ namespace App\Models;
 
 use App\Enums\KategoriKebutuhan;
 use App\Enums\PrioritasKebutuhan;
+use App\Enums\StatusDonasi;
+use App\Models\Concerns\TercatatDiLog;
 use Database\Factories\KebutuhanPantiFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Scope;
@@ -11,13 +13,14 @@ use Illuminate\Database\Eloquent\Attributes\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 #[Table('kebutuhan_panti')]
-#[Fillable(['nama', 'kategori', 'jumlah', 'satuan', 'prioritas', 'skor_prioritas', 'terpenuhi', 'keterangan'])]
+#[Fillable(['nama', 'kategori', 'jumlah', 'satuan', 'target_dana', 'prioritas', 'skor_prioritas', 'terpenuhi', 'keterangan'])]
 class KebutuhanPanti extends Model
 {
     /** @use HasFactory<KebutuhanPantiFactory> */
-    use HasFactory;
+    use HasFactory, TercatatDiLog;
 
     /**
      * @var array<string, mixed>
@@ -39,6 +42,7 @@ class KebutuhanPanti extends Model
         return [
             'kategori' => KategoriKebutuhan::class,
             'jumlah' => 'integer',
+            'target_dana' => 'integer',
             'prioritas' => PrioritasKebutuhan::class,
             'skor_prioritas' => 'integer',
             'terpenuhi' => 'boolean',
@@ -64,5 +68,60 @@ class KebutuhanPanti extends Model
             ->orderBy('terpenuhi')
             ->orderByDesc('skor_prioritas')
             ->orderBy('nama');
+    }
+
+    /**
+     * Sertakan total donasi diterima untuk kebutuhan ini sebagai atribut dana_terkumpul.
+     */
+    #[Scope]
+    protected function denganDanaTerkumpul(Builder $query): void
+    {
+        $query->withSum(['donasi as dana_terkumpul' => fn (Builder $donasi) => $donasi->where('status', StatusDonasi::Diterima)], 'nominal');
+    }
+
+    /**
+     * Total donasi diterima. Memakai hasil denganDanaTerkumpul() bila sudah dimuat.
+     */
+    public function danaTerkumpul(): int
+    {
+        if (! array_key_exists('dana_terkumpul', $this->attributes)) {
+            $this->attributes['dana_terkumpul'] = $this->donasi()->where('status', StatusDonasi::Diterima)->sum('nominal');
+        }
+
+        return (int) $this->attributes['dana_terkumpul'];
+    }
+
+    /**
+     * Persentase dana terkumpul terhadap target (0-100), atau null bila target belum diisi.
+     */
+    public function persenTerkumpul(): ?int
+    {
+        if (! $this->target_dana) {
+            return null;
+        }
+
+        return (int) min(100, floor($this->danaTerkumpul() / $this->target_dana * 100));
+    }
+
+    /**
+     * Nama kebutuhan beserta jumlahnya, mis. "Beras (50 kg)".
+     */
+    public function label(): string
+    {
+        if (! $this->jumlah) {
+            return $this->nama;
+        }
+
+        return trim(sprintf('%s (%s %s)', $this->nama, number_format($this->jumlah, 0, ',', '.'), $this->satuan));
+    }
+
+    public function donasi(): HasMany
+    {
+        return $this->hasMany(Donasi::class);
+    }
+
+    public function labelLog(): string
+    {
+        return $this->nama;
     }
 }

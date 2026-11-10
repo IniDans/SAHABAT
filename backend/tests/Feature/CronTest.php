@@ -4,15 +4,17 @@ namespace Tests\Feature;
 
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 class CronTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_cron_prunes_expired_tokens_with_the_right_secret(): void
+    public function test_cron_prunes_expired_tokens_and_backs_up_with_the_right_secret(): void
     {
         config(['services.cron.secret' => 'rahasia-cron']);
+        Storage::fake();
 
         $user = User::factory()->create();
         $user->createToken('lama', expiresAt: now()->subDays(2));
@@ -23,6 +25,7 @@ class CronTest extends TestCase
             ->assertNoContent();
 
         $this->assertSame(['aktif'], $user->tokens()->pluck('name')->all());
+        $this->assertCount(1, Storage::files('cadangan'));
     }
 
     public function test_cron_is_hidden_without_the_right_secret(): void

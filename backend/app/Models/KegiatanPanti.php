@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\JenisKegiatan;
+use App\Models\Concerns\TercatatDiLog;
 use Database\Factories\KegiatanPantiFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Table;
@@ -14,7 +15,7 @@ use Illuminate\Database\Eloquent\Model;
 class KegiatanPanti extends Model
 {
     /** @use HasFactory<KegiatanPantiFactory> */
-    use HasFactory;
+    use HasFactory, TercatatDiLog;
 
     /**
      * Tabel ini hanya punya created_at.
@@ -59,5 +60,10 @@ class KegiatanPanti extends Model
         return $this->nama_foto && $this->nama_foto !== self::FOTO_DEFAULT
             ? self::FOTO_FOLDER.'/'.$this->nama_foto
             : null;
+    }
+
+    public function labelLog(): string
+    {
+        return (string) $this->nama_kegiatan;
     }
 }

@@ -15,7 +15,10 @@ class KebutuhanPantiRequest extends FormRequest
      */
     protected function prepareForValidation(): void
     {
-        $this->merge(['terpenuhi' => $this->boolean('terpenuhi')]);
+        $this->merge([
+            'terpenuhi' => $this->boolean('terpenuhi'),
+            'target_dana' => preg_replace('/\D/', '', (string) $this->input('target_dana')) ?: null,
+        ]);
     }
 
     /**
@@ -30,6 +33,7 @@ class KebutuhanPantiRequest extends FormRequest
             'kategori' => ['required', Rule::enum(KategoriKebutuhan::class)],
             'jumlah' => ['nullable', 'integer', 'min:1'],
             'satuan' => ['nullable', 'string', 'max:30'],
+            'target_dana' => ['nullable', 'integer', 'min:1000', 'max:10000000000'],
             'prioritas' => ['required', Rule::enum(PrioritasKebutuhan::class)],
             'skor_prioritas' => ['required', 'integer', 'between:0,100'],
             'terpenuhi' => ['boolean'],
@@ -44,6 +48,7 @@ class KebutuhanPantiRequest extends FormRequest
     {
         return [
             'skor_prioritas' => 'skor prioritas',
+            'target_dana' => 'target dana',
         ];
     }
 }

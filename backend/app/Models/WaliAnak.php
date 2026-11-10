@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\TercatatDiLog;
 use Database\Factories\WaliAnakFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Table;
@@ -14,10 +15,15 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class WaliAnak extends Model
 {
     /** @use HasFactory<WaliAnakFactory> */
-    use HasFactory;
+    use HasFactory, TercatatDiLog;
 
     public function anak(): HasMany
     {
         return $this->hasMany(AnakPanti::class, 'ID_Wali', 'ID_Wali');
+    }
+
+    public function labelLog(): string
+    {
+        return (string) $this->Nama_Wali;
     }
 }
