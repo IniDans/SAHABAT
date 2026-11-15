@@ -328,6 +328,8 @@ function initAdminSidebar() {
     const setOpen = (isOpen) => {
         sidebar.classList.toggle('-translate-x-full', !isOpen);
         toggle.setAttribute('aria-expanded', String(isOpen));
+        // Halaman di belakang dikunci supaya geseran di layar HP menggulir menu, bukan halaman.
+        document.body.classList.toggle('overflow-hidden', isOpen);
 
         if (backdrop) {
             backdrop.hidden = !isOpen;
