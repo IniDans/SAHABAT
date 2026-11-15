@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<title>KK Demo</title>
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; width: 1754px; height: 1240px; background: #eef3ee; font-family: Arial, sans-serif; color: #111; }
+  .lembar { position: relative; margin: 40px; height: 1160px; padding: 36px 44px; background: #f7fbf6; border: 2px solid #9fb8a3; overflow: hidden; }
+  .watermark { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; pointer-events: none; }
+  .watermark span { transform: rotate(-18deg); font-size: 64px; font-weight: bold; color: rgba(200, 30, 30, .13); letter-spacing: 4px; white-space: nowrap; }
+  h1 { margin: 0; text-align: center; font-size: 34px; letter-spacing: 6px; }
+  .nomor { text-align: center; font-size: 22px; font-weight: bold; margin: 6px 0 22px; }
+  .info { display: grid; grid-template-columns: 1fr 1fr; gap: 0 80px; font-size: 16px; margin-bottom: 22px; }
+  .info div { display: grid; grid-template-columns: 220px 14px 1fr; padding: 3px 0; }
+  table { width: 100%; border-collapse: collapse; font-size: 14px; margin-bottom: 18px; }
+  th, td { border: 1px solid #333; padding: 6px 6px; text-align: center; }
+  th { background: #dfe9df; font-size: 12.5px; }
+  td.kiri { text-align: left; }
+  .kaki { display: grid; grid-template-columns: 1fr 1fr 1fr; font-size: 15px; margin-top: 18px; }
+  .ttd { text-align: center; }
+  .ttd .nama { margin-top: 70px; font-weight: bold; text-decoration: underline; }
+  .peringatan { position: absolute; bottom: 14px; left: 44px; right: 44px; text-align: center; font-size: 13px; color: #a01818; font-weight: bold; }
+</style>
+</head>
+<body>
+<div class="lembar">
+  <div class="watermark"><span>CONTOH · DATA FIKTIF · BUKAN DOKUMEN ASLI</span></div>
+
+  <h1>KARTU KELUARGA</h1>
+  <div class="nomor">No. 9999991201190007</div>
+
+  <div class="info">
+    <div><span>Nama Kepala Keluarga</span><span>:</span><b>HENDRA KUSUMA</b></div>
+    <div><span>Kecamatan</span><span>:</span><b>LOWOKWARU</b></div>
+    <div><span>Alamat</span><span>:</span><b>JL. MAWAR INDAH NO. 12</b></div>
+    <div><span>Kabupaten/Kota</span><span>:</span><b>KOTA MALANG</b></div>
+    <div><span>RT/RW</span><span>:</span><b>003/005</b></div>
+    <div><span>Kode Pos</span><span>:</span><b>65141</b></div>
+    <div><span>Desa/Kelurahan</span><span>:</span><b>SUKAMAJU</b></div>
+    <div><span>Provinsi</span><span>:</span><b>JAWA TIMUR</b></div>
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+        <th>No</th><th>Nama Lengkap</th><th>NIK</th><th>Jenis Kelamin</th><th>Tempat Lahir</th>
+        <th>Tanggal Lahir</th><th>Agama</th><th>Pendidikan</th><th>Jenis Pekerjaan</th><th>Golongan Darah</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td>1</td><td class="kiri">HENDRA KUSUMA</td><td>9999991403850001</td><td>LAKI-LAKI</td><td>MALANG</td><td>14-03-1985</td><td>ISLAM</td><td>SLTA/SEDERAJAT</td><td>WIRASWASTA</td><td>O</td></tr>
+      <tr><td>2</td><td class="kiri">RATNA DEWI LESTARI</td><td>9999996208880002</td><td>PEREMPUAN</td><td>BLITAR</td><td>22-08-1988</td><td>ISLAM</td><td>SLTA/SEDERAJAT</td><td>MENGURUS RUMAH TANGGA</td><td>A</td></tr>
+      <tr><td>3</td><td class="kiri">ANDIKA PRATAMA KUSUMA</td><td>9999990501120003</td><td>LAKI-LAKI</td><td>MALANG</td><td>05-01-2012</td><td>ISLAM</td><td>TAMAT SD/SEDERAJAT</td><td>PELAJAR/MAHASISWA</td><td>O</td></tr>
+      <tr><td>4</td><td class="kiri">SALSABILA PUTRI KUSUMA</td><td>9999995706160004</td><td>PEREMPUAN</td><td>MALANG</td><td>17-06-2016</td><td>ISLAM</td><td>BELUM TAMAT SD/SEDERAJAT</td><td>PELAJAR/MAHASISWA</td><td>A</td></tr>
+      <tr><td>5</td><td class="kiri">RIZKY AL FATIH KUSUMA</td><td>9999993009220005</td><td>LAKI-LAKI</td><td>MALANG</td><td>30-09-2022</td><td>ISLAM</td><td>TIDAK/BELUM SEKOLAH</td><td>BELUM/TIDAK BEKERJA</td><td>TIDAK TAHU</td></tr>
+    </tbody>
+  </table>
+
+  <table>
+    <thead>
+      <tr>
+        <th>No</th><th>Status Perkawinan</th><th>Tanggal Perkawinan</th><th>Status Hubungan Dalam Keluarga</th>
+        <th>Kewarganegaraan</th><th>No. Paspor</th><th>No. KITAP</th><th>Nama Ayah</th><th>Nama Ibu</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td>1</td><td>KAWIN</td><td>10-06-2010</td><td>KEPALA KELUARGA</td><td>WNI</td><td>-</td><td>-</td><td class="kiri">SUPARMAN</td><td class="kiri">SITI AMINAH</td></tr>
+      <tr><td>2</td><td>KAWIN</td><td>10-06-2010</td><td>ISTRI</td><td>WNI</td><td>-</td><td>-</td><td class="kiri">SAMSUL HADI</td><td class="kiri">MULYANI</td></tr>
+      <tr><td>3</td><td>BELUM KAWIN</td><td>-</td><td>ANAK</td><td>WNI</td><td>-</td><td>-</td><td class="kiri">HENDRA KUSUMA</td><td class="kiri">RATNA DEWI LESTARI</td></tr>
+      <tr><td>4</td><td>BELUM KAWIN</td><td>-</td><td>ANAK</td><td>WNI</td><td>-</td><td>-</td><td class="kiri">HENDRA KUSUMA</td><td class="kiri">RATNA DEWI LESTARI</td></tr>
+      <tr><td>5</td><td>BELUM KAWIN</td><td>-</td><td>ANAK</td><td>WNI</td><td>-</td><td>-</td><td class="kiri">HENDRA KUSUMA</td><td class="kiri">RATNA DEWI LESTARI</td></tr>
+    </tbody>
+  </table>
+
+  <div class="kaki">
+    <div>Dikeluarkan Tanggal : <b>12-01-2019</b></div>
+    <div class="ttd">KEPALA KELUARGA<div class="nama">HENDRA KUSUMA</div></div>
+    <div class="ttd">PEJABAT PENCATAT<div class="nama">(CONTOH)</div></div>
+  </div>
+
+  <div class="peringatan">Dokumen contoh untuk uji fitur Scan KK di aplikasi SAHABAT. Semua nama, NIK (kode wilayah 999999), dan alamat adalah karangan.</div>
+</div>
+</body>
+</html>

@@ -7,8 +7,8 @@ use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Artisan;
 
 /**
- * Pengganti scheduler untuk hosting tanpa cron server (mis. Vercel Cron).
- * Vercel mengirim header "Authorization: Bearer <CRON_SECRET>".
+ * Pengganti scheduler untuk hosting tanpa cron server: layanan cron eksternal
+ * memanggil route ini dengan header "Authorization: Bearer <CRON_SECRET>".
  */
 class CronController extends Controller
 {

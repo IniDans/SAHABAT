@@ -64,7 +64,7 @@
         <div class="relative flex flex-1">
             <div class="fixed inset-0 z-30 bg-black/40 lg:hidden" hidden data-sidebar-backdrop></div>
 
-            <aside id="admin-sidebar" class="fixed inset-y-0 left-0 z-40 flex w-60 -translate-x-full flex-col bg-footer px-3 py-6 text-white transition-transform duration-200 lg:static lg:translate-x-0" data-sidebar>
+            <aside id="admin-sidebar" class="fixed inset-y-0 left-0 z-40 flex w-60 -translate-x-full flex-col overflow-y-auto overscroll-contain bg-footer px-3 py-6 text-white transition-transform duration-200 lg:static lg:translate-x-0 lg:overflow-visible" data-sidebar>
                 <nav class="flex-1 space-y-5 text-[13px]" aria-label="Menu admin">
                     @foreach ($menu as $section => $items)
                         <div>

@@ -114,7 +114,7 @@ return [
     | Trusted Proxies
     |--------------------------------------------------------------------------
     |
-    | Isi bila aplikasi berjalan di belakang proxy (mis. Vercel), supaya
+    | Isi bila aplikasi berjalan di belakang proxy (mis. Cloudflare), supaya
     | HTTPS dan IP asli pengunjung terbaca dari header X-Forwarded-*.
     | "*" untuk semua proxy, atau daftar IP dipisah koma. Kosongkan jika
     | server langsung menerima koneksi dari internet.

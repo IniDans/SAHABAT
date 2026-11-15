@@ -35,7 +35,7 @@ return [
         'model' => env('GEMINI_MODEL', 'gemini-3.5-flash-lite'),
     ],
 
-    // Rahasia untuk route cron (Vercel Cron). Kosong berarti route cron selalu 404.
+    // Rahasia untuk route cron (hosting tanpa cron server). Kosong berarti route cron selalu 404.
     'cron' => [
         'secret' => env('CRON_SECRET'),
     ],

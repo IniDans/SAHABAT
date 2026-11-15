@@ -46,11 +46,6 @@
             "npm install --ignore-scripts --prefix ../frontend",
             "npm run build --prefix ../frontend"
         ],
-        "vercel": [
-            "npm ci --ignore-scripts --prefix ../frontend",
-            "npm run build --prefix ../frontend",
-            "rm -rf resources/views && mkdir -p resources && cp -r ../frontend/views resources/views"
-        ],
         "dev": [
             "Composer\\Config::disableProcessTimeout",
             "npm run dev:all --prefix ../frontend"

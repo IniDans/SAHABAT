@@ -7,14 +7,12 @@ return [
     | Lokasi tampilan Blade
     |--------------------------------------------------------------------------
     |
-    | Semua tampilan ada di folder frontend/views di root repo. Di Vercel
-    | folder frontend tidak ikut terunggah bersama backend, jadi saat build
-    | isinya disalin ke resources/views (lihat vercel.json).
+    | Semua tampilan ada di folder frontend/views di root repo.
     |
     */
 
     'paths' => [
-        realpath(base_path('../frontend/views')) ?: resource_path('views'),
+        base_path('../frontend/views'),
     ],
 
     'compiled' => env(

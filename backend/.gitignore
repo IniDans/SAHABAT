@@ -27,6 +27,3 @@ Thumbs.db
 
 # Dump database berisi data pribadi anak, jangan di-commit
 /database/sql/*.sql
-
-# Salinan frontend/views yang dibuat saat build di Vercel
-/resources/views

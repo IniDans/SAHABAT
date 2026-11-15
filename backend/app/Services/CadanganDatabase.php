@@ -10,7 +10,7 @@ use RuntimeException;
 
 /**
  * Cadangan database sebagai file SQL (INSERT) yang dikompres gzip, disimpan di disk privat.
- * Tidak memakai mysqldump agar bisa jalan di hosting tanpa akses shell (mis. Vercel).
+ * Tidak memakai mysqldump agar bisa jalan di hosting tanpa akses shell.
  * Isinya memuat data pribadi anak, jadi hanya admin yang boleh mengunduhnya.
  */
 class CadanganDatabase
