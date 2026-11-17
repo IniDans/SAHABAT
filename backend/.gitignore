@@ -27,3 +27,6 @@ Thumbs.db
 
 # Dump database berisi data pribadi anak, jangan di-commit
 /database/sql/*.sql
+
+# Kredensial hosting kampus (password SFTP & database)
+/sahabat.md
