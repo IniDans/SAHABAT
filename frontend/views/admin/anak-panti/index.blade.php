@@ -102,6 +102,20 @@
     @endif
 
     <div class="admin-card mt-4 overflow-hidden" data-anak-daftar>
+        {{-- Centang baris ikut ke form export (form=""), jadi NIK untuk hapus banyak disalin oleh JS saat dikirim. --}}
+        @can('admin')
+            <form action="{{ route('admin.anak-panti.hapus-banyak') }}" method="POST" class="hidden flex-wrap items-center gap-3 border-b border-[#f0f0f0] bg-[#f5faf7] px-5 py-2.5 text-[13px] data-[ada]:flex" data-anak-hapus-form>
+                @csrf
+                @method('DELETE')
+                <span class="font-medium" aria-live="polite"><span data-anak-hapus-jumlah>0</span> anak dipilih</span>
+                <span class="hidden text-xs text-slate data-[ada]:inline" data-anak-hapus-info></span>
+                <button type="submit" class="admin-btn ml-auto h-8 border border-[#f3c2c5] bg-white px-3 text-[#c0262f] hover:bg-[#fdecee] disabled:pointer-events-none disabled:opacity-50" data-anak-hapus-kirim>
+                    <x-admin.icon name="trash" width="14" height="14" />
+                    Hapus terpilih
+                </button>
+            </form>
+        @endcan
+
         <div class="overflow-x-auto">
             <table class="w-full text-left text-[13px]">
                 <thead class="bg-[#e3f1ea] text-xs text-footer">
@@ -126,7 +140,7 @@
                         @endphp
                         <tr class="has-[:checked]:bg-[#f5faf7]">
                             <td class="py-3 pr-2 pl-5">
-                                <input type="checkbox" form="form-ekspor" name="nik[]" value="{{ $item->NIK }}" class="size-4 align-middle accent-footer" aria-label="Pilih {{ $item->Nama }}" data-anak-pilih>
+                                <input type="checkbox" form="form-ekspor" name="nik[]" value="{{ $item->NIK }}" class="size-4 align-middle accent-footer" aria-label="Pilih {{ $item->Nama }}" data-anak-pilih data-nama="{{ $item->Nama }}" @if ($item->isDeletable()) data-bisa-hapus @endif>
                             </td>
                             <td class="px-4 py-3">
                                 <p class="font-semibold">

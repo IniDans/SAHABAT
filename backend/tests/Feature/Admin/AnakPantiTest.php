@@ -90,6 +90,45 @@ class AnakPantiTest extends TestCase
         $this->assertModelMissing($alumni);
     }
 
+    public function test_bulk_delete_removes_selected_alumni_and_skips_active_children(): void
+    {
+        $aktif = AnakPanti::factory()->create(['Nama' => 'RAKA']);
+        $alumni = AnakPanti::factory()->alumni()->count(2)->create();
+        $tidakDipilih = AnakPanti::factory()->alumni()->create();
+
+        $this->actingAs(User::factory()->admin()->create())
+            ->from(route('admin.anak-panti.index'))
+            ->delete(route('admin.anak-panti.hapus-banyak'), ['nik' => [$aktif->NIK, ...$alumni->modelKeys()]])
+            ->assertRedirect(route('admin.anak-panti.index'))
+            ->assertSessionHas('status', '2 data anak berhasil dihapus. 1 anak masih aktif tidak dihapus: RAKA.');
+
+        $alumni->each(fn (AnakPanti $anak) => $this->assertModelMissing($anak));
+        $this->assertModelExists($aktif);
+        $this->assertModelExists($tidakDipilih);
+    }
+
+    public function test_bulk_delete_rejects_selection_of_only_active_children(): void
+    {
+        $aktif = AnakPanti::factory()->create();
+
+        $this->actingAs(User::factory()->admin()->create())
+            ->delete(route('admin.anak-panti.hapus-banyak'), ['nik' => [$aktif->NIK]])
+            ->assertSessionHasErrors(['hapus' => 'Anak yang dipilih masih aktif, jadi tidak dapat dihapus. Ubah status asuh menjadi Alumni terlebih dulu.']);
+
+        $this->assertModelExists($aktif);
+    }
+
+    public function test_bulk_delete_is_only_for_admin(): void
+    {
+        $alumni = AnakPanti::factory()->alumni()->create();
+
+        $this->actingAs(User::factory()->create())
+            ->delete(route('admin.anak-panti.hapus-banyak'), ['nik' => [$alumni->NIK]])
+            ->assertForbidden();
+
+        $this->assertModelExists($alumni);
+    }
+
     public function test_export_csv_contains_selected_children_and_columns_in_list_order(): void
     {
         $raka = AnakPanti::factory()->create(['Nama' => 'RAKA', 'Kesehatan' => 'Sehat']);
