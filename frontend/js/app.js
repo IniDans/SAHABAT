@@ -670,6 +670,68 @@ function initEksporAnak() {
 }
 
 /**
+ * Hapus banyak data anak: bilah aksi muncul saat ada baris dicentang. Centang baris milik
+ * form export, jadi NIK yang bisa dihapus (alumni) disalin ke form hapus saat dikirim.
+ */
+function initHapusBanyakAnak() {
+    const form = document.querySelector('[data-anak-hapus-form]');
+
+    if (!form) {
+        return;
+    }
+
+    const baris = [...document.querySelectorAll('[data-anak-pilih]')];
+    const pilihSemua = document.querySelector('[data-anak-pilih-semua]');
+    const jumlah = form.querySelector('[data-anak-hapus-jumlah]');
+    const info = form.querySelector('[data-anak-hapus-info]');
+    const kirim = form.querySelector('[data-anak-hapus-kirim]');
+
+    const dipilih = () => baris.filter((checkbox) => checkbox.checked);
+
+    const perbarui = () => {
+        const semua = dipilih();
+        const aktif = semua.filter((checkbox) => !('bisaHapus' in checkbox.dataset)).length;
+
+        form.toggleAttribute('data-ada', semua.length > 0);
+        jumlah.textContent = semua.length;
+        kirim.disabled = semua.length === aktif;
+        info.toggleAttribute('data-ada', aktif > 0);
+        info.textContent = aktif === semua.length
+            ? 'Anak yang masih aktif tidak dapat dihapus. Ubah status asuh menjadi Alumni terlebih dulu.'
+            : `${aktif} anak masih aktif tidak ikut dihapus.`;
+    };
+
+    form.addEventListener('submit', (event) => {
+        const semua = dipilih();
+        const bisaHapus = semua.filter((checkbox) => 'bisaHapus' in checkbox.dataset);
+        const aktif = semua.filter((checkbox) => !('bisaHapus' in checkbox.dataset));
+        let pesan = `Hapus ${bisaHapus.length} data anak? Data yang dihapus tidak bisa dikembalikan.`;
+
+        if (aktif.length) {
+            pesan += `\n\n${aktif.map((checkbox) => checkbox.dataset.nama).join(', ')} masih aktif dan tidak ikut dihapus.`;
+        }
+
+        if (!bisaHapus.length || !window.confirm(pesan)) {
+            event.preventDefault();
+            return;
+        }
+
+        form.querySelectorAll('input[name="nik[]"]').forEach((input) => input.remove());
+        bisaHapus.forEach((checkbox) => {
+            const input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = 'nik[]';
+            input.value = checkbox.value;
+            form.append(input);
+        });
+    });
+
+    baris.forEach((checkbox) => checkbox.addEventListener('change', perbarui));
+    pilihSemua?.addEventListener('change', perbarui);
+    perbarui();
+}
+
+/**
  * Grafik tren berat badan: garis bantu dan tooltip saat bulan disorot kursor atau fokus keyboard.
  */
 function initGrafikTren() {
@@ -874,6 +936,7 @@ document.addEventListener('DOMContentLoaded', () => {
     initAdminDialogs();
     initAnakForm();
     initEksporAnak();
+    initHapusBanyakAnak();
     initPindaiDokumen();
     initTinjauPindai();
     initGrafikTren();

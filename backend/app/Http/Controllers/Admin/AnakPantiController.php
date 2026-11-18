@@ -14,6 +14,7 @@ use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 use OpenSpout\Common\Entity\Row;
@@ -89,6 +90,40 @@ class AnakPantiController extends Controller
         $anakPanti->delete();
 
         return back()->with('status', "Data {$anakPanti->Nama} berhasil dihapus.");
+    }
+
+    /**
+     * Hapus anak-anak yang dicentang. Yang masih aktif dilewati, sama dengan aturan hapus satu per satu.
+     */
+    public function hapusBanyak(Request $request): RedirectResponse
+    {
+        $data = $request->validate([
+            'nik' => ['required', 'array'],
+            'nik.*' => ['string'],
+        ], [
+            'nik.required' => 'Pilih data anak yang akan dihapus.',
+        ]);
+
+        [$bisaDihapus, $masihAktif] = AnakPanti::query()
+            ->whereKey($data['nik'])
+            ->orderBy('Nama')
+            ->get()
+            ->partition(fn (AnakPanti $anak): bool => $anak->isDeletable());
+
+        if ($bisaDihapus->isEmpty()) {
+            return back()->withErrors(['hapus' => 'Anak yang dipilih masih aktif, jadi tidak dapat dihapus. Ubah status asuh menjadi Alumni terlebih dulu.']);
+        }
+
+        // Hapus lewat model satu per satu agar tiap penghapusan tercatat di log aktivitas.
+        DB::transaction(fn () => $bisaDihapus->each->delete());
+
+        $pesan = "{$bisaDihapus->count()} data anak berhasil dihapus.";
+
+        if ($masihAktif->isNotEmpty()) {
+            $pesan .= " {$masihAktif->count()} anak masih aktif tidak dihapus: {$masihAktif->pluck('Nama')->join(', ', ' dan ')}.";
+        }
+
+        return back()->with('status', $pesan);
     }
 
     /**

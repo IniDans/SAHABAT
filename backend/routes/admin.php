@@ -89,6 +89,7 @@ Route::middleware(['auth', 'auth.session', 'aktif'])->group(function () {
         Route::get('anak-panti/pindai', [PindaiDokumenController::class, 'tinjau'])->name('anak-panti.pindai');
         Route::post('anak-panti/pindai/simpan', [PindaiDokumenController::class, 'simpan'])->name('anak-panti.pindai.simpan');
         Route::delete('anak-panti/pindai', [PindaiDokumenController::class, 'batal'])->name('anak-panti.pindai.batal');
+        Route::delete('anak-panti', [AnakPantiController::class, 'hapusBanyak'])->middleware('can:admin')->name('anak-panti.hapus-banyak');
         Route::resource('anak-panti', AnakPantiController::class)
             ->only(['index', 'store', 'update', 'destroy'])
             ->middlewareFor('destroy', 'can:admin');
